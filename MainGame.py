@@ -12,6 +12,8 @@ from data.bin.mainchar import Main_Player
 from data.bin.chest import Chest
 from data.bin.npc import Merchant
 from data.bin.icons import Icons
+from data.bin.item_list import AllItems
+from data.bin.floor_plans import Floors
 os.environ['SDL_VIDEO_CENTERED'] = '1' #this sets the window
 pygame.init() #initializes pygame, always need to have this
 
@@ -33,74 +35,15 @@ class GAMEFRAME:
 
     #ALL IMAGE STUFF HAPPENS HERE
 
-    self.level1 = [
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], #1
-      [0,1,1,1,1,1,1,1,1,1,0,1,1,0,0], #2
-      [0,0,1,1,0,1,1,1,1,1,0,0,1,0,0], #3
-      [0,1,1,3,1,1,3,1,1,1,0,3,0,1,0], #4
-      [0,1,1,1,1,1,1,1,1,1,1,1,0,1,0], #5
-      [0,1,1,1,1,1,1,1,1,1,1,1,1,0,0], #6
-      [0,1,1,1,1,1,1,1,1,1,1,1,1,1,0], #7
-      [0,1,1,1,1,1,1,1,1,1,1,0,1,1,0], #8
-      [0,1,0,0,1,1,1,1,1,1,1,1,1,1,0], #9
-      [0,1,0,1,1,1,1,0,0,0,1,1,1,1,0], #10
-      [0,1,0,1,0,0,0,1,1,1,0,0,1,0,0], #11
-      [0,0,1,1,1,0,0,1,0,1,0,0,1,1,0], #12
-      [0,1,1,1,1,0,1,1,0,1,0,0,1,1,0], #13
-      [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0]  #14
-      ]
 
     self.collision_dict = {}
     self.party = []
     self.enemy_dict = {}
     self.npc_dict = {}
     self.chest_dict = {}
+    self.item_list = AllItems().item_list
+    self.level1 = Floors().level1
 
-    """Zero: item ID
-      First: item name
-      Second: Item classification, and the type
-      Third: REQUIRED LEVEL NEEDED TO USE IT
-      ----ALWAYS INDEX NUMBER 4------
-      Fourth: The specific status of it.
-
-      Equipment specific statuses go like this:
-      [Attack,Defense,Health,Speed]
-
-      could include:
-        Critical Strike?
-
-
-      Fifth: [Buy Price, Sell Price]
-      Sixth: Description of item
-
-
-
-
-      """
-
-    self.item_list =[
-      [0, "Small Health Potion",["Consumable", "Health"], [1,"Potion"], 10,  [10,5], ["This restores 10 HP to a character."]],
-      [1, "Large Health Potion",["Consumable", "Health"], [1,"Potion"], 50,  [25,10],["This restores 50 HP to a character."]],
-      [2, "Super Health Potion",["Consumable", "Health"], [1,"Potion"], 100, [50,20],["This restores 100 HP to a character."]],
-
-      [3, "Small Mana Potion",  ["Consumable", "Mana"], [1,"Potion"], 10,  [10,5], ["This restores 10 MP to a character."]],
-      [4, "Large Mana Potion",  ["Consumable", "Mana"], [1,"Potion"], 50,  [25,10], ["This restores 50 MP to a character."]],
-      [5, "Super Mana Potion",  ["Consumable", "Mana"], [1,"Potion"], 100, [50,20], ["This restores 100 MP to a character."]],
-
-      [6, "Small Dagger"    ,["Equipment","Weapon"], [1,"Dagger"], [1,0,0,3],  [1,8],  ["A small, yet effective weapon."]],
-      [7, "Bronze Sword"    ,["Equipment","Weapon"], [3,"Sword"], [2,1,0,2],  [50,25], ["What squires swing at eachother trying to be knights."]],
-      [8, "Iron Sword"      ,["Equipment","Weapon"], [5,"Sword"], [3,1,0,1],  [100,50],["Brave and noble nights wield these."]],
-
-      [9,  "Cloth Hat"      ,["Equipment","Helm"], [1, "Cloth"], [0,1,2,3],  [15,8],["Farmhands use these to protect from the sun, and you wanna protect from a sword."]],
-      [10, "Bronze Helm"    ,["Equipment","Helm"], [3, "Plate"], [0,2,3,2],  [50,25],["Made with the finest bronze the local towns have to offer."]],
-      [11, "Iron Helm"      ,["Equipment","Helm"], [5, "Plate"],[0,3,5,1],  [75,25], ["Many of these are scattered in deserts."]],
-
-
-      [12, "Cloth Armor"    ,["Equipment","Chest"],[1, "Cloth"],[0,1,2,2], [15,8], ["Taken from a practice dummy, this hopefully will keep you alive."]],
-      [13, "Bronze Armor"   ,["Equipment","Chest"],[3, "Plate"],[0,2,3,1], [50,25],["Guards wear it, and now you!"]],
-      [14, "Iron Armor"     ,["Equipment","Chest"],[5, "Plate"],[0,3,5,1], [75,25], ["You can take an arrow to the gut with this and make it away."]]
-
-       ]
     self.level_list = [
       [2,40], #level, amount to next level
       [3,120]
@@ -158,33 +101,37 @@ class GAMEFRAME:
                                    GAME.SIZE)) #draw basic chest
 
 
-start_inventory = [
-      [0, "Small Health Potion",["Consumable", "Health"], [1,"Potion"], 10,  [10,5], ["This restores 10 HP to a character."]],
-      [3, "Small Mana Potion",  ["Consumable", "Mana"], [1,"Potion"], 10,  [10,5], ["This restores 10 MP to a character."]],
-      [6, "Small Dagger"    ,["Equipment","Weapon"], [1,"Dagger"], [1,0,0,3],  [1,8],  ["A small, yet effective weapon."]],
-      [8, "Iron Sword"      ,["Equipment","Weapon"], [5,"Sword"], [3,1,0,1],  [100,50],["Brave and noble nights wield these."]],
-      [9,  "Cloth Hat"      ,["Equipment","Helm"], [1, "Cloth"], [0,1,2,3],  [15,8],["Farmhands use these to protect from the sun, and you wanna protect from a sword."]],
-      [12, "Cloth Armor"    ,["Equipment","Chest"],[1, "Cloth"],[0,1,2,2], [15,8], ["Taken from a practice dummy, this hopefully will keep you alive."]]
-      ]
 
-tier1_consumables = [
-      [0, "Small Health Potion",["Consumable", "Health"], [1,"Potion"], 10,  [10,5], ["This restores 10 HP to a character."]],
-      [3, "Small Mana Potion",  ["Consumable", "Mana"], [1,"Potion"], 10,  [10,5], ["This restores 10 MP to a character."]]
-                     ]
-tier1_gear = [
-      [9,  "Cloth Hat"      ,["Equipment","Helm"], [1, "Cloth"], [0,1,2,3],  [15,8],["Farmhands use these to protect from the sun, and you wanna protect from a sword."]],
-      [12, "Cloth Armor"    ,["Equipment","Chest"],[1, "Cloth"],[0,1,2,2], [15,8], ["Taken from a practice dummy, this hopefully will keep you alive."]]
-      ]
-
-tier1_weapons = [
-      [6, "Small Dagger"    ,["Equipment","Weapon"], [1,"Dagger"], [1,0,0,3],  [1,8],  ["A small, yet effective weapon."]]
- ]
-
-akey = ''
 
 ########################## INSTANCES #########
 #INITIALIZE GAME
 GAME = GAMEFRAME(15,14,32)
+#Starting Inventory
+start_inventory = [
+  GAME.item_list[0],
+  GAME.item_list[3],
+  GAME.item_list[6],
+  GAME.item_list[8],
+  GAME.item_list[9],
+  GAME.item_list[10],     
+  GAME.item_list[12],      ]
+
+tier1_consumables = [
+  GAME.item_list[0],
+  GAME.item_list[3],
+                     ]
+tier1_gear = [
+  GAME.item_list[9],
+  GAME.item_list[12]
+      ]
+
+tier1_weapons = [
+  GAME.item_list[6],
+ ]
+
+akey = ''
+
+
 #max length per line, 50 chars   USE THIS ['',''] FORMAT
 message = MessageBox('',0,GAME.win, GAME.MAP_X, GAME.SIZE)
 #instance              #x,   y
