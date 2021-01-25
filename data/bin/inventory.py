@@ -314,7 +314,7 @@ class Inventory():
       action  = self.font.render("Use" ,False,(255,255,255)) #action = use or equip
       self.win.blit(action, (self.itemrect.right-130, top))
     if self.itemcode == 2: #EQUIPMENT
-      if self.char.weapon == self.submenu[self.submenupos][0]:
+      if self.char.wedapon == self.submenu[self.submenupos][0]:
         action  = self.font.render("Unequip" ,False,(255,255,255)) #action = use or equip
       else:
         action  = self.font.render("Equip" ,False,(255,255,255)) #action = use or equip
@@ -492,9 +492,6 @@ class Inventory():
 
         if self.nav_menu_in == 4 and self.laste == 3:
            if self.nav_menu == 2:
-               #self.show_equipment_selection = 1
-               #self.cycle_weapons()
-               #self.show_equipment_selection = 1
                if akey == 'q':
                  self.nav_menu_in = 3
                  self.laste = 2
@@ -502,25 +499,24 @@ class Inventory():
                  self.equipment_selection = 1
                tmp = len(self.update_dict("Equipment",self.cycle_choice))
 
+               if akey == 's': #cycle down
+                 if (self.equipment_selection  + 1) == tmp:
+                  self.equipment_selection = tmp
+                 elif self.equipment_selection < tmp:
+                  self.equipment_selection +=1
+           
+               if akey == 'w':
+                  if (self.equipment_selection % tmp) -1  == 0:
+                    self.equipment_selection = 1
+                  elif self.equipment_selection>1 :
+                    self.equipment_selection-=1
 
-        #       #COMPARE WEAPON JAZZ HERE
+               if akey == 'e': 
+                  self.nav_menu_in = 5
+                  self.laste = 4
 
-
-        #       if akey == 's': #cycle down
-        #         #equipment selection starts at 1
-        #         if (self.equipment_selection  + 1) == tmp:
-        #             self.equipment_selection = tmp
-        #         elif self.equipment_selection < tmp:
-        #               self.equipment_selection +=1
-
-        #       if akey == 'w':
-        #         if (self.equipment_selection % tmp) -1  == 0:
-        #           self.equipment_selection = 1
-        #         elif self.equipment_selection>1 :
-        #           self.equipment_selection-=1
-        #       if akey == 'e':
-        #           self.nav_menu_in = 5
-
-        #       print(self.equipment_selection)
-        # if self.nav_menu_in == 5 and self.laste == 4:
-        #     pass
+        #This is where we actually will prompt for drop, etc.    
+        if self.nav_menu_in == 5 and self.laste == 4:
+          if akey == 'q':
+            self.nav_menu_in = 4
+            self.laste = 3
