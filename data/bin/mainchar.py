@@ -1,4 +1,5 @@
 import pygame
+from .item_list import AllItems
 class Main_Player(pygame.sprite.Sprite):
   def __init__(self, x, y,adict,enemydict,npcdict,maxhealth,maxmana):
   #maxhp : maxhealth is the maxHP for char
@@ -21,9 +22,9 @@ class Main_Player(pygame.sprite.Sprite):
     self.level = 1
     self.aclass = 'Assassin'
     self.exp = 0
-    self.weapon =   [6, "Small Dagger"    ,["Equipment","Weapon"],[1,"Dagger"], [1,0,0,3],  [1,8],  ["A small, yet effective weapon."]]
-    self.helmet =   [9,  "Cloth Hat"      ,["Equipment","Helm"], [1, "Cloth"], [0,1,2,3],  [15,8],["Farmhands use these to protect from the sun, and you wanna protect from a sword."]]
-    self.armor  =   [12, "Cloth Armor"    ,["Equipment","Chest"],[1, "Cloth"],[0,1,2,2], [15,8], ["Taken from a practice dummy, this hopefully will keep you alive."]]
+    self.weapon = AllItems().item_list[6]
+    self.helmet = AllItems().item_list[9]
+    self.armor  = AllItems().item_list[12]
     self.trinket = [0, "NA"]
   #WHEN YOU ADD TRINKETS UPDATE INVENTORY.PY LINE 217-220
     self.baseattack = 1
