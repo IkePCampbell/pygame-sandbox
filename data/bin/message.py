@@ -5,7 +5,7 @@ main_path = os.path.dirname('message')
 image_path = os.path.join(main_path, 'data\sprites\obj')
 class MessageBox():
   def __init__(self,text,show,awin,x,size):
-    self.icon_old = pygame.image.load(os.path.join(image_path, 'chat_icon.gif')).convert_alpha()
+    self.icon_old = pygame.image.load= pygame.image.load("/Users/isaaccampbell/Desktop/pygame-sandbox/data/sprites/obj/chat_icon.gif").convert_alpha()
     self.icon = pygame.transform.scale(self.icon_old, (16,16))
     self.text = text
     self.show = show
@@ -19,7 +19,7 @@ class MessageBox():
     self.laste = 0
     #self.message_box_old = pygame.image.load(os.path.join(image_path, 'message.gif')).convert_alpha()
     #self.message_box = pygame.transform.scale(self.message_box_old, (self.width, self.height))
-    self.message_box = pygame.image.load(os.path.join(image_path, 'message.gif'))
+    #self.message_box = pygame.image.load(os.path.join(image_path, 'message.gif'))
   def update_text(self):
 
     rect = pygame.Rect(self.x_pos,self.y_pos,self.width,self.height)
