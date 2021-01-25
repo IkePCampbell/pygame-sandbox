@@ -193,8 +193,12 @@ class Inventory():
       tmpAttack = achar.baseattack + hoveredOver[0]
       tmpDefence = achar.basedefence + hoveredOver[1] 
 
+      if tmpAttack > achar.attack:
+        pass #show green
+      if tmpAttack < achar.attack:
+        pass #show red
 
-     #FROM HERE SHOW THE ARROWS 
+
 
   def update_dict(self,acode, atype):
     """
@@ -281,16 +285,6 @@ class Inventory():
     the dictionary to append to a list so in our menu our current "submenupos" will position in the list with the item.
     for example if we have one item in our inventory, we have [item, value]. If we have 2 potions of health we just want one record in
     our inventory list with a value of 2"""
-
-    #self.submenu = [] #gets current submenu
-    #inv = self.update_dict()
-    #for item in inv:
-      #self.submenu.append([item, inv[item]]) # item, value
-
-    #pygame.draw.rect(self.win, (60,60,60), self.itemrect) #refreshes the background window
-    #top  = self.itemrect.top+40
-    #left = self.itemrect.left+5
-    #self.items()  #redisplay information
     if tabchoice == 2:
       pygame.draw.rect(self.win, (60,60,60), (122,55,340,370))
       self.show_char_stats(self.level_list)
@@ -328,20 +322,20 @@ class Inventory():
 
     """
 
-  #def sub_choose(self):
+  def sub_choose(self):
     """
     If the user clicks A or D, scrolls through the avaliable options, paints the text on the new tile when its done
     """
-##    top  = self.itemrect.top+70+ (30*self.submenupos)
-##    submenurect = pygame.Rect(self.itemrect.right-140,top,130,30)
-##    #pygame.draw.rect(self.win,(4,4,4),submenurect) #puts a highlighted box over the current item
-##    if self.sub_choice == 0:
-##      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-140),top,45,30))
-##    if self.sub_choice == 1:
-##      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-95) ,top,43,30))
-##    if self.sub_choice == 2:
-##      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-53) ,top,43,30))
-##    self.interact_sub_menu()
+    top  = self.itemrect.top+70+ (30*self.submenupos)
+    submenurect = pygame.Rect(self.itemrect.right-140,top,130,30)
+    pygame.draw.rect(self.win,(4,4,4),submenurect) #puts a highlighted box over the current item
+    if self.sub_choice == 0:
+      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-140),top,45,30))
+    if self.sub_choice == 1:
+      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-95) ,top,43,30))
+    if self.sub_choice == 2:
+      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-53) ,top,43,30))
+    self.interact_sub_menu()
 
 
   #def reset_drop(self,sc,le,nmi):
@@ -520,3 +514,6 @@ class Inventory():
           if akey == 'q':
             self.nav_menu_in = 4
             self.laste = 3
+          
+
+          
