@@ -236,7 +236,7 @@ while run:
       if inventory.nav_menu == 2: #on equipment
         inventory.show_inventory(inventory.show_inv)
         inventory.access_submenu(inventory.nav_menu)
-        inventory.show_char_stats(GAME.level_list)
+        #inventory.show_char_stats(GAME.level_list)
 
     if inventory.nav_menu_in == 3:
       if inventory.nav_menu == 2:
@@ -246,7 +246,6 @@ while run:
       if inventory.nav_menu == 2:
         inventory.show_equipment_selection = 1
         inventory.cycle_weapons()
-
 
       #inventory.update_inventory()
 

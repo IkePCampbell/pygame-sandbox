@@ -32,6 +32,9 @@ class Inventory():
     self.equipment_selection = 1
     self.show_equipment_selection = 0
     self.cycle_choice = 1
+    self.WHITE_COLOR=(255,255,255)
+    self.RED_COLOR=(255,0,0)
+    self.GREEN_COLOR=(0,255,0)
 
   def show_char_stats(self,level_list):
     self.level_list = level_list
@@ -175,28 +178,28 @@ class Inventory():
     if self.nav_menu_in == 4:
         self.compare_weapons(adict,achar)
   
-  def compare_weapons(self,adict,achar):
-      """
-      The purpose of this function is to compare the weapon the user currently
-      has to the item its hovered over
-      """
-      itemList = []
-      for item in adict:
-          itemList.append(item) #creates tmp list of inventory
+  # def compare_weapons(self,adict,achar):
+  #     """
+  #     The purpose of this function is to compare the weapon the user currently
+  #     has to the item its hovered over
+  #     """
+  #     itemList = []
+  #     for item in adict:
+  #         itemList.append(item) #creates tmp list of inventory
 
-      for possibleItems in self.item_list:
-        if possibleItems[1] == itemList[self.equipment_selection-1]:  #name of item "small dagger"
-          hoveredOver = possibleItems[4]
-        else:
-          pass
+  #     for possibleItems in self.item_list:
+  #       if possibleItems[1] == itemList[self.equipment_selection-1]:  #name of item "small dagger"
+  #         hoveredOver = possibleItems[4]
+  #       else:
+  #         pass
 
-      tmpAttack = achar.baseattack + hoveredOver[0]
-      tmpDefence = achar.basedefence + hoveredOver[1] 
+  #     tmpAttack = achar.baseattack + hoveredOver[0]
+  #     tmpDefence = achar.basedefence + hoveredOver[1] 
 
-      if tmpAttack > achar.attack:
-        pass #show green
-      if tmpAttack < achar.attack:
-        pass #show red
+  #     if tmpAttack > achar.attack:
+  #       self.inventory_side_stats(self.GREEN_COLOR,tmpAttack)
+  #     if tmpAttack < achar.attack:
+  #       self.inventory_side_stats(self.RED_COLOR,tmpAttack)
 
 
 
@@ -231,12 +234,10 @@ class Inventory():
     """
     equiprect = pygame.Rect(122,55,340,370)
     description_rect = pygame.Rect(125,354,333,67)
-    statsrect = pygame.Rect(10,272,110,153)
     pygame.draw.rect(self.win, (60,60,60), equiprect)
     pygame.draw.rect (self.win, (100,100,100), (125,100,160,250)) #left box
     pygame.draw.rect (self.win, (100,100,100), (290,100,168,250)) #right box
     pygame.draw.rect (self.win, (100,100,100), description_rect) #item description box
-    pygame.draw.rect (self.win, (60,60,60), statsrect) #FOR INDIVIDUAL STATS
 
     char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
     #Equipment Header
@@ -260,12 +261,18 @@ class Inventory():
     trinket = self.small_font.render("Trinket : " +char.trinket[1],False,(255,255,255))
     self.win.blit(trinket, (equiprect.left+20,equiprect.top+260))
 
+    self.inventory_side_stats(char.attack,self.WHITE_COLOR)
 
-    #SHOW CHARACTER STATS
+    self.cycle_weapons()
+
+  def inventory_side_stats(self,attack,attackcolor):
+    statsrect = pygame.Rect(10,272,110,153)
+    pygame.draw.rect (self.win, (60,60,60), statsrect) #FOR INDIVIDUAL STATS
+    char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
 
     #attack stat
     self.win.blit(all_icons.attackicon, (statsrect.left+3, statsrect.top+10))
-    attackstat = self.small_font.render(str(char.attack), False, (255,255,255))
+    attackstat = self.small_font.render(str(attack), False, (attackcolor))
     self.win.blit(attackstat, (statsrect.left+27,statsrect.top+10))
     #defence stat
     self.win.blit(all_icons.defenceicon, (statsrect.left+3, statsrect.top+32))
@@ -275,10 +282,6 @@ class Inventory():
     self.win.blit(all_icons.speedicon, (statsrect.left+3, statsrect.top+54))
     speedstat = self.small_font.render(str(char.speed), False, (255,255,255))
     self.win.blit(speedstat, (statsrect.left+27,statsrect.top+54))
-
-
-    #Equipment
-    self.cycle_weapons()
 
   def access_submenu(self,tabchoice):
     """so the submenu relies on constant updates when we use,drop,sell, whatever items. Because of this we need to call
