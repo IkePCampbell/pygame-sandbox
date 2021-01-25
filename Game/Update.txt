@@ -1,0 +1,5 @@
+After messing around with getting a map, collision boundaries, a chest system, working with enemy collision, an item system, an inventory system, I decided to move on to Java to 
+utilize more of their tools and see if I could translate my game to a different platform smoothly. I learned a lot from this project, and maybe will come back and finish it and mess
+with it someday but for I might just let this sit here for a little bit while I compare this format with Java.
+
+
