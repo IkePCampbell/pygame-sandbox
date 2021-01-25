@@ -32,6 +32,8 @@ class Inventory():
     self.equipment_selection = 1
     self.show_equipment_selection = 0
     self.cycle_choice = 1
+    self.invAttr = []
+    self.tmpAttr =[]
     self.WHITE_COLOR=(255,255,255)
     self.RED_COLOR=(255,0,0)
     self.GREEN_COLOR=(0,255,0)
@@ -164,7 +166,6 @@ class Inventory():
           equip_count = acount
       acount+=1
 
-
     if len(adict) > 0 and self.show_equipment_selection == 1:
         self.win.blit(all_icons.icon,(textrect.left,textrect.top+3+(30*self.equipment_selection)))
 
@@ -176,30 +177,22 @@ class Inventory():
     self.win.blit(all_icons.equipicon,(textrect.left+14,textrect.top+34+(30*equip_count))) # show equip icon
 
     if self.nav_menu_in == 4:
-        self.compare_weapons(adict,achar)
-  
-  # def compare_weapons(self,adict,achar):
-  #     """
-  #     The purpose of this function is to compare the weapon the user currently
-  #     has to the item its hovered over
-  #     """
-  #     itemList = []
-  #     for item in adict:
-  #         itemList.append(item) #creates tmp list of inventory
+      itemList = []
+      for item in adict:
+          itemList.append(item) #creates tmp list of inventory
 
-  #     for possibleItems in self.item_list:
-  #       if possibleItems[1] == itemList[self.equipment_selection-1]:  #name of item "small dagger"
-  #         hoveredOver = possibleItems[4]
-  #       else:
-  #         pass
+      for possibleItems in self.item_list:
+        if possibleItems[1] == itemList[self.equipment_selection-1]:  #name of item "small dagger"
+          hoveredOver = possibleItems[4]
+        else:
+          pass
 
-  #     tmpAttack = achar.baseattack + hoveredOver[0]
-  #     tmpDefence = achar.basedefence + hoveredOver[1] 
+      tmpAttack = achar.baseattack + hoveredOver[0]
 
-  #     if tmpAttack > achar.attack:
-  #       self.inventory_side_stats(self.GREEN_COLOR,tmpAttack)
-  #     if tmpAttack < achar.attack:
-  #       self.inventory_side_stats(self.RED_COLOR,tmpAttack)
+      tmpDefence = achar.basedefence + hoveredOver[1] 
+
+      self.tmpAttr = [tmpAttack]
+      self.inventory_side_stats()
 
 
 
@@ -261,27 +254,45 @@ class Inventory():
     trinket = self.small_font.render("Trinket : " +char.trinket[1],False,(255,255,255))
     self.win.blit(trinket, (equiprect.left+20,equiprect.top+260))
 
-    self.inventory_side_stats(char.attack,self.WHITE_COLOR)
+    self.inventory_side_stats()
 
     self.cycle_weapons()
 
-  def inventory_side_stats(self,attack,attackcolor):
+  def inventory_side_stats(self):
     statsrect = pygame.Rect(10,272,110,153)
     pygame.draw.rect (self.win, (60,60,60), statsrect) #FOR INDIVIDUAL STATS
     char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
+    #Reset everytime we attempt to compare
+    self.invAttr=[char.attack]
+    #Means we are comparing if the list is greater than 1
+    if len(self.tmpAttr) >= 1:
+      for i in range(0,len(self.invAttr)):
+        if self.tmpAttr[i] > self.invAttr[i]:
+          color = self.GREEN_COLOR
+        if self.tmpAttr[i] < self.invAttr[i]:
+          color = self.RED_COLOR
+        if self.tmpAttr[i] == self.invAttr[i]:
+          color = self.WHITE_COLOR
+        stat = self.small_font.render(str(self.tmpAttr[i]), False, (color))
+        self.win.blit(stat, (statsrect.left+27,statsrect.top+(10+(22*i))))
+        self.tmpAttr =[]
+    else:
+      for i in range(len(self.invAttr)):
+        stat = self.small_font.render(str(self.invAttr[i]), False, self.WHITE_COLOR)
+        self.win.blit(stat, (statsrect.left+27,statsrect.top+(10+(22*i))))
+
+
 
     #attack stat
     self.win.blit(all_icons.attackicon, (statsrect.left+3, statsrect.top+10))
-    attackstat = self.small_font.render(str(attack), False, (attackcolor))
-    self.win.blit(attackstat, (statsrect.left+27,statsrect.top+10))
-    #defence stat
-    self.win.blit(all_icons.defenceicon, (statsrect.left+3, statsrect.top+32))
-    defencestat = self.small_font.render(str(char.defence), False, (255,255,255))
-    self.win.blit(defencestat, (statsrect.left+27,statsrect.top+32))
-    #speed stat
-    self.win.blit(all_icons.speedicon, (statsrect.left+3, statsrect.top+54))
-    speedstat = self.small_font.render(str(char.speed), False, (255,255,255))
-    self.win.blit(speedstat, (statsrect.left+27,statsrect.top+54))
+    # #defence stat
+    # self.win.blit(all_icons.defenceicon, (statsrect.left+3, statsrect.top+32))
+    # defencestat = self.small_font.render(str(defemce), False, (defencecolor))
+    # self.win.blit(defencestat, (statsrect.left+27,statsrect.top+32))
+    # #speed stat
+    # self.win.blit(all_icons.speedicon, (statsrect.left+3, statsrect.top+54))
+    # speedstat = self.small_font.render(str(char.speed), False, (255,255,255))
+    # self.win.blit(speedstat, (statsrect.left+27,statsrect.top+54))
 
   def access_submenu(self,tabchoice):
     """so the submenu relies on constant updates when we use,drop,sell, whatever items. Because of this we need to call
