@@ -184,14 +184,26 @@ class Inventory():
       for possibleItems in self.item_list:
         if possibleItems[1] == itemList[self.equipment_selection-1]:  #name of item "small dagger"
           hoveredOver = possibleItems[4]
+          typeOfEquipment = possibleItems[2][1]
         else:
           pass
+      
+      if typeOfEquipment == "Chest":
+        tmpDefence =  achar.basedefence + achar.helmet[4][1] + hoveredOver[1] + achar.weapon[4][1]
+        tmpSpeed = achar.basespeed + achar.helmet[4][3]+ hoveredOver[3] + achar.weapon[4][3]
+        tmpAttack = achar.baseattack + achar.helmet[4][0] + hoveredOver[0]+ achar.weapon[4][0]
+      elif typeOfEquipment == "Helm":
+        tmpDefence =  achar.basedefence + achar.armor[4][1] + hoveredOver[1] + achar.weapon[4][1]
+        tmpSpeed = achar.basespeed + achar.armor[4][3]+ hoveredOver[3] + achar.weapon[4][3]
+        tmpAttack = achar.baseattack + achar.armor[4][0] + hoveredOver[0] + achar.weapon[4][0]
+      #Meaning we are attempting to equip a weapon
+      else:
+        tmpDefence = achar.basedefence + achar.helmet[4][1] + achar.armor[4][1] + hoveredOver[1]
+        tmpSpeed =  achar.basespeed + achar.helmet[4][3]+ achar.armor[4][3]+ hoveredOver[3]
+        tmpAttack = achar.baseattack + achar.helmet[4][0]+ achar.armor[4][0] + hoveredOver[0]
 
-      tmpAttack = achar.baseattack + hoveredOver[0]
-      tmpDefence = achar.basedefence + hoveredOver[1] 
-      tmpSpeed = achar.basespeed + hoveredOver[3] 
+
       self.tmpAttr = [tmpAttack,tmpDefence,tmpSpeed]
-
       self.inventory_side_stats()
 
 
@@ -263,7 +275,6 @@ class Inventory():
     pygame.draw.rect (self.win, (60,60,60), statsrect) #FOR INDIVIDUAL STATS
     char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
     #Reset everytime we attempt to compare
-    print(self.invAttr)
     self.invAttr=[char.attack,char.defence,char.speed]
     #Means we are comparing if the list is greater than 1
     if len(self.tmpAttr) >= 1:
