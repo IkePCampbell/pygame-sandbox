@@ -30,10 +30,10 @@ class Main_Player(pygame.sprite.Sprite):
     self.baseattack = 1
     self.basedefence = 1
     self.basespeed = 1
-    self.attack = self.baseattack + self.weapon[4][0] #pulls the weapon slot
-    self.defence = self.basedefence + self.helmet[4][1] + self.armor[4][1]
+    self.attack =  self.baseattack  + self.helmet[4][0] + self.armor[4][0] + self.weapon[4][0] #pulls the weapon slot
+    self.defence = self.basedefence + self.helmet[4][1] + self.armor[4][1] + self.weapon[4][1]
+    self.speed =   self.basespeed + self.helmet[4][3] + self.armor[4][3] + self.weapon[4][3]
     self.maxhp += self.weapon[4][2]+self.helmet[4][2]+self.armor[4][2]
-    self.speed = self.basespeed + self.weapon[4][3]
     self.hp = self.maxhp
     self.mp = self.maxmp
 

@@ -32,6 +32,11 @@ class Inventory():
     self.equipment_selection = 1
     self.show_equipment_selection = 0
     self.cycle_choice = 1
+    self.invAttr = []
+    self.tmpAttr =[]
+    self.WHITE_COLOR=(255,255,255)
+    self.RED_COLOR=(255,0,0)
+    self.GREEN_COLOR=(0,255,0)
 
   def show_char_stats(self,level_list):
     self.level_list = level_list
@@ -161,7 +166,6 @@ class Inventory():
           equip_count = acount
       acount+=1
 
-
     if len(adict) > 0 and self.show_equipment_selection == 1:
         self.win.blit(all_icons.icon,(textrect.left,textrect.top+3+(30*self.equipment_selection)))
 
@@ -173,13 +177,6 @@ class Inventory():
     self.win.blit(all_icons.equipicon,(textrect.left+14,textrect.top+34+(30*equip_count))) # show equip icon
 
     if self.nav_menu_in == 4:
-        self.compare_weapons(adict,achar)
-  
-  def compare_weapons(self,adict,achar):
-      """
-      The purpose of this function is to compare the weapon the user currently
-      has to the item its hovered over
-      """
       itemList = []
       for item in adict:
           itemList.append(item) #creates tmp list of inventory
@@ -187,14 +184,29 @@ class Inventory():
       for possibleItems in self.item_list:
         if possibleItems[1] == itemList[self.equipment_selection-1]:  #name of item "small dagger"
           hoveredOver = possibleItems[4]
+          typeOfEquipment = possibleItems[2][1]
         else:
           pass
+      
+      if typeOfEquipment == "Chest":
+        tmpDefence =  achar.basedefence + achar.helmet[4][1] + hoveredOver[1] + achar.weapon[4][1]
+        tmpSpeed = achar.basespeed + achar.helmet[4][3]+ hoveredOver[3] + achar.weapon[4][3]
+        tmpAttack = achar.baseattack + achar.helmet[4][0] + hoveredOver[0]+ achar.weapon[4][0]
+      elif typeOfEquipment == "Helm":
+        tmpDefence =  achar.basedefence + achar.armor[4][1] + hoveredOver[1] + achar.weapon[4][1]
+        tmpSpeed = achar.basespeed + achar.armor[4][3]+ hoveredOver[3] + achar.weapon[4][3]
+        tmpAttack = achar.baseattack + achar.armor[4][0] + hoveredOver[0] + achar.weapon[4][0]
+      #Meaning we are attempting to equip a weapon
+      else:
+        tmpDefence = achar.basedefence + achar.helmet[4][1] + achar.armor[4][1] + hoveredOver[1]
+        tmpSpeed =  achar.basespeed + achar.helmet[4][3]+ achar.armor[4][3]+ hoveredOver[3]
+        tmpAttack = achar.baseattack + achar.helmet[4][0]+ achar.armor[4][0] + hoveredOver[0]
 
-      tmpAttack = achar.baseattack + hoveredOver[0]
-      tmpDefence = achar.basedefence + hoveredOver[1] 
+
+      self.tmpAttr = [tmpAttack,tmpDefence,tmpSpeed]
+      self.inventory_side_stats()
 
 
-     #FROM HERE SHOW THE ARROWS 
 
   def update_dict(self,acode, atype):
     """
@@ -227,12 +239,10 @@ class Inventory():
     """
     equiprect = pygame.Rect(122,55,340,370)
     description_rect = pygame.Rect(125,354,333,67)
-    statsrect = pygame.Rect(10,272,110,153)
     pygame.draw.rect(self.win, (60,60,60), equiprect)
     pygame.draw.rect (self.win, (100,100,100), (125,100,160,250)) #left box
     pygame.draw.rect (self.win, (100,100,100), (290,100,168,250)) #right box
     pygame.draw.rect (self.win, (100,100,100), description_rect) #item description box
-    pygame.draw.rect (self.win, (60,60,60), statsrect) #FOR INDIVIDUAL STATS
 
     char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
     #Equipment Header
@@ -256,41 +266,42 @@ class Inventory():
     trinket = self.small_font.render("Trinket : " +char.trinket[1],False,(255,255,255))
     self.win.blit(trinket, (equiprect.left+20,equiprect.top+260))
 
+    self.inventory_side_stats()
 
-    #SHOW CHARACTER STATS
-
-    #attack stat
-    self.win.blit(all_icons.attackicon, (statsrect.left+3, statsrect.top+10))
-    attackstat = self.small_font.render(str(char.attack), False, (255,255,255))
-    self.win.blit(attackstat, (statsrect.left+27,statsrect.top+10))
-    #defence stat
-    self.win.blit(all_icons.defenceicon, (statsrect.left+3, statsrect.top+32))
-    defencestat = self.small_font.render(str(char.defence), False, (255,255,255))
-    self.win.blit(defencestat, (statsrect.left+27,statsrect.top+32))
-    #speed stat
-    self.win.blit(all_icons.speedicon, (statsrect.left+3, statsrect.top+54))
-    speedstat = self.small_font.render(str(char.speed), False, (255,255,255))
-    self.win.blit(speedstat, (statsrect.left+27,statsrect.top+54))
-
-
-    #Equipment
     self.cycle_weapons()
+
+  def inventory_side_stats(self):
+    statsrect = pygame.Rect(10,272,110,153)
+    pygame.draw.rect (self.win, (60,60,60), statsrect) #FOR INDIVIDUAL STATS
+    char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
+    #Reset everytime we attempt to compare
+    self.invAttr=[char.attack,char.defence,char.speed]
+    #Means we are comparing if the list is greater than 1
+    if len(self.tmpAttr) >= 1:
+      for i in range(len(self.invAttr)):
+        if self.tmpAttr[i] > self.invAttr[i]:
+          color = self.GREEN_COLOR
+        if self.tmpAttr[i] < self.invAttr[i]:
+          color = self.RED_COLOR
+        if self.tmpAttr[i] == self.invAttr[i]:
+          color = self.WHITE_COLOR
+        stat = self.small_font.render(str(self.tmpAttr[i]), False, (color))
+        self.win.blit(stat, (statsrect.left+27,statsrect.top+(10+(22*i))))
+      self.tmpAttr =[]
+    else:
+      for i in range(len(self.invAttr)):
+        stat = self.small_font.render(str(self.invAttr[i]), False, self.WHITE_COLOR)
+        self.win.blit(stat, (statsrect.left+27,statsrect.top+(10+(22*i))))
+
+    self.win.blit(all_icons.attackicon, (statsrect.left+3, statsrect.top+10))
+    self.win.blit(all_icons.defenceicon, (statsrect.left+3, statsrect.top+32))
+    self.win.blit(all_icons.speedicon, (statsrect.left+3, statsrect.top+54))
 
   def access_submenu(self,tabchoice):
     """so the submenu relies on constant updates when we use,drop,sell, whatever items. Because of this we need to call
     the dictionary to append to a list so in our menu our current "submenupos" will position in the list with the item.
     for example if we have one item in our inventory, we have [item, value]. If we have 2 potions of health we just want one record in
     our inventory list with a value of 2"""
-
-    #self.submenu = [] #gets current submenu
-    #inv = self.update_dict()
-    #for item in inv:
-      #self.submenu.append([item, inv[item]]) # item, value
-
-    #pygame.draw.rect(self.win, (60,60,60), self.itemrect) #refreshes the background window
-    #top  = self.itemrect.top+40
-    #left = self.itemrect.left+5
-    #self.items()  #redisplay information
     if tabchoice == 2:
       pygame.draw.rect(self.win, (60,60,60), (122,55,340,370))
       self.show_char_stats(self.level_list)
@@ -328,20 +339,20 @@ class Inventory():
 
     """
 
-  #def sub_choose(self):
+  def sub_choose(self):
     """
     If the user clicks A or D, scrolls through the avaliable options, paints the text on the new tile when its done
     """
-##    top  = self.itemrect.top+70+ (30*self.submenupos)
-##    submenurect = pygame.Rect(self.itemrect.right-140,top,130,30)
-##    #pygame.draw.rect(self.win,(4,4,4),submenurect) #puts a highlighted box over the current item
-##    if self.sub_choice == 0:
-##      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-140),top,45,30))
-##    if self.sub_choice == 1:
-##      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-95) ,top,43,30))
-##    if self.sub_choice == 2:
-##      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-53) ,top,43,30))
-##    self.interact_sub_menu()
+    top  = self.itemrect.top+70+ (30*self.submenupos)
+    submenurect = pygame.Rect(self.itemrect.right-140,top,130,30)
+    pygame.draw.rect(self.win,(4,4,4),submenurect) #puts a highlighted box over the current item
+    if self.sub_choice == 0:
+      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-140),top,45,30))
+    if self.sub_choice == 1:
+      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-95) ,top,43,30))
+    if self.sub_choice == 2:
+      pygame.draw.rect(self.win, self.select, ((self.itemrect.right-53) ,top,43,30))
+    self.interact_sub_menu()
 
 
   #def reset_drop(self,sc,le,nmi):
@@ -520,3 +531,6 @@ class Inventory():
           if akey == 'q':
             self.nav_menu_in = 4
             self.laste = 3
+          
+
+          
