@@ -188,10 +188,10 @@ class Inventory():
           pass
 
       tmpAttack = achar.baseattack + hoveredOver[0]
-
       tmpDefence = achar.basedefence + hoveredOver[1] 
+      tmpSpeed = achar.basespeed + hoveredOver[3] 
+      self.tmpAttr = [tmpAttack,tmpDefence,tmpSpeed]
 
-      self.tmpAttr = [tmpAttack]
       self.inventory_side_stats()
 
 
@@ -263,10 +263,11 @@ class Inventory():
     pygame.draw.rect (self.win, (60,60,60), statsrect) #FOR INDIVIDUAL STATS
     char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
     #Reset everytime we attempt to compare
-    self.invAttr=[char.attack]
+    print(self.invAttr)
+    self.invAttr=[char.attack,char.defence,char.speed]
     #Means we are comparing if the list is greater than 1
     if len(self.tmpAttr) >= 1:
-      for i in range(0,len(self.invAttr)):
+      for i in range(len(self.invAttr)):
         if self.tmpAttr[i] > self.invAttr[i]:
           color = self.GREEN_COLOR
         if self.tmpAttr[i] < self.invAttr[i]:
@@ -275,24 +276,15 @@ class Inventory():
           color = self.WHITE_COLOR
         stat = self.small_font.render(str(self.tmpAttr[i]), False, (color))
         self.win.blit(stat, (statsrect.left+27,statsrect.top+(10+(22*i))))
-        self.tmpAttr =[]
+      self.tmpAttr =[]
     else:
       for i in range(len(self.invAttr)):
         stat = self.small_font.render(str(self.invAttr[i]), False, self.WHITE_COLOR)
         self.win.blit(stat, (statsrect.left+27,statsrect.top+(10+(22*i))))
 
-
-
-    #attack stat
     self.win.blit(all_icons.attackicon, (statsrect.left+3, statsrect.top+10))
-    # #defence stat
-    # self.win.blit(all_icons.defenceicon, (statsrect.left+3, statsrect.top+32))
-    # defencestat = self.small_font.render(str(defemce), False, (defencecolor))
-    # self.win.blit(defencestat, (statsrect.left+27,statsrect.top+32))
-    # #speed stat
-    # self.win.blit(all_icons.speedicon, (statsrect.left+3, statsrect.top+54))
-    # speedstat = self.small_font.render(str(char.speed), False, (255,255,255))
-    # self.win.blit(speedstat, (statsrect.left+27,statsrect.top+54))
+    self.win.blit(all_icons.defenceicon, (statsrect.left+3, statsrect.top+32))
+    self.win.blit(all_icons.speedicon, (statsrect.left+3, statsrect.top+54))
 
   def access_submenu(self,tabchoice):
     """so the submenu relies on constant updates when we use,drop,sell, whatever items. Because of this we need to call
