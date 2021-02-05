@@ -151,9 +151,7 @@ GAME.enemy_dict['mob2'] = bat3
 GAME.npc_dict['merchant1'] = merchant1
 
 GAME.party.append(main_char)
-GAME.party.append(main_char)
-GAME.party.append(main_char)
-GAME.party.append(main_char)
+
 #always want drawing to be done in one area, anytime i redraw it needs to be here
 def update_screen():
   keys = pygame.key.get_pressed()
@@ -240,13 +238,24 @@ while run:
 
     if inventory.nav_menu_in == 3:
       if inventory.nav_menu == 2:
+        inventory.show_description(inventory.party[inventory.curr_party_member-1],None)
         inventory.equipment(inventory.curr_party_member)
 
     if inventory.nav_menu_in == 4:
       if inventory.nav_menu == 2:
         inventory.show_equipment_selection = 1
+        inventory.equipment(inventory.curr_party_member)
         inventory.cycle_weapons()
+       
+    if inventory.nav_menu_in == 6:
+      if inventory.nav_menu == 2:
+        inventory.equipment(inventory.curr_party_member)
+        inventory.cycle_weapons()
+        inventory.interact_sub_menu(akey)
 
+    if inventory.nav_menu_in == 7:
+      if inventory.nav_menu == 2:
+        inventory.confirm_drop()
       #inventory.update_inventory()
 
 ##    if inventory.nav_menu_in == 1:  KEEP FOR ITEMS

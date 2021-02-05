@@ -14,7 +14,7 @@ class Main_Player(pygame.sprite.Sprite):
     self.collision_dict = adict
     self.enemy_dict = enemydict
     self.npc_dict = npcdict
-    self.maxhp = maxhealth
+    self.maxhealth = maxhealth
     self.maxmp = maxmana
     self.gold = 0   #you start off broke
     self.incombat = 0
@@ -33,9 +33,40 @@ class Main_Player(pygame.sprite.Sprite):
     self.attack =  self.baseattack  + self.helmet[4][0] + self.armor[4][0] + self.weapon[4][0] #pulls the weapon slot
     self.defence = self.basedefence + self.helmet[4][1] + self.armor[4][1] + self.weapon[4][1]
     self.speed =   self.basespeed + self.helmet[4][3] + self.armor[4][3] + self.weapon[4][3]
-    self.maxhp += self.weapon[4][2]+self.helmet[4][2]+self.armor[4][2]
+    self.maxhp = self.maxhealth + self.weapon[4][2]+self.helmet[4][2]+self.armor[4][2]
     self.hp = self.maxhp
     self.mp = self.maxmp
+
+  def calculateStats(self):
+    self.attack =  self.baseattack  + self.helmet[4][0] + self.armor[4][0] + self.weapon[4][0]
+    self.defence = self.basedefence + self.helmet[4][1] + self.armor[4][1] + self.weapon[4][1]
+    self.speed =   self.basespeed + self.helmet[4][3] + self.armor[4][3] + self.weapon[4][3]
+    self.maxhp = self.maxhealth + self.weapon[4][2]+self.helmet[4][2]+self.armor[4][2]
+    self.hp = self.maxhp
+    self.mp = self.maxmp
+
+  def equipGear(self,gear,action):
+    if gear[2][1] == "Weapon":
+      if action != "UnEquip":
+        self.weapon = gear
+      else:
+        #Equip fists
+        self.weapon = AllItems().item_list[15]
+
+    if gear[2][1] == "Helm":
+      if action != "UnEquip":
+        self.helmet = gear
+      else:
+        #Equip fists
+        self.helmet = AllItems().item_list[16]
+
+    if gear[2][1] == "Chest":
+      if action != "UnEquip":
+        self.armor = gear
+      else:
+        #Equip fists
+        self.armor = AllItems().item_list[16]
+    self.calculateStats()
 
 
 

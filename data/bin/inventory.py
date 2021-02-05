@@ -1,4 +1,5 @@
 import pygame
+from .message import MessageBox
 from .icons import Icons
 
 all_icons = Icons()
@@ -13,13 +14,13 @@ class Inventory():
     self.tiny_font   = pygame.font.SysFont('Arial',13)
     self.inv_choice = ['Items','Equipment','Abilities','Status']
     self.nav_menu = 1 # This cycles through the tabs in inventory choice
-    self.nav_menu_in = 0 #How deep we are in the inventory 0:no tab, 1: sub tab, 2: interact w/ item, 3: confirming
+    self.nav_menu_in = 0 #How deep we are in the inventory 
     self.itemrect = pygame.Rect(135,55,330,380)
     self.submenupos = 0
     self.submenu = []
     self.sub_choice = 0
     self.laste = 0
-    self.confirm = 1
+    self.confirm = 0
     self.yes = 0
     self.no  = 0
     self.win = awin
@@ -37,6 +38,8 @@ class Inventory():
     self.WHITE_COLOR=(255,255,255)
     self.RED_COLOR=(255,0,0)
     self.GREEN_COLOR=(0,255,0)
+    self.inventoryChoice = 0
+    self.holding_equip = False
 
   def show_char_stats(self,level_list):
     self.level_list = level_list
@@ -76,9 +79,9 @@ class Inventory():
         if level[0]-1 == achar.level: #2-1 = 1,
           xpneeded = level[1] - achar.exp #40-20 = 20 exp needed
 
-      currentxp = "Exp Needed        "+str(xpneeded)#this basically means 45/50
+      currentxp = "Exp Needed      "+str(xpneeded)#this basically means 45/50
       xp   = self.tiny_font.render(currentxp, False,(255,255,255)) #mp
-      self.win.blit(xp,            (party_frame.right-105, party_frame.top+(count*90)+60)) #mp text
+      self.win.blit(xp,            (party_frame.right-115, party_frame.top+(count*90)+60)) #mp text
 
       #ATTACK
       currentattack = str(achar.attack)
@@ -145,6 +148,7 @@ class Inventory():
         #itemDict = self.update_dict(2,4)
         #display_equipment(itemDict,"Trinkets",self.party[self.curr_party_member])
   def display_equipment(self,adict,aheader,achar):
+    self.holding_equip = False
     textrect = pygame.Rect(290,100,168,320)
     itemList = []
     itemCount = []
@@ -154,7 +158,9 @@ class Inventory():
 
     #displays items tab
     equip_count = 0
-    acount = 0
+    wep_c = 0
+    hel_c = 0
+    arm_c = 0
     for item in adict:
       #check current pary members gear to see if its equipped
       #print the rest of the inventory
@@ -163,8 +169,16 @@ class Inventory():
       itemCount.append(self.stats_font.render(count,False, (255,255,255)))
 
       if item == achar.weapon[1]:
-          equip_count = acount
-      acount+=1
+        equip_count = wep_c
+      wep_c+=1
+
+      if item == achar.helmet[1]:
+        equip_count = hel_c
+      hel_c+=1
+
+      if item == achar.armor[1]:
+        equip_count = arm_c
+      arm_c+=1
 
     if len(adict) > 0 and self.show_equipment_selection == 1:
         self.win.blit(all_icons.icon,(textrect.left,textrect.top+3+(30*self.equipment_selection)))
@@ -174,19 +188,30 @@ class Inventory():
       self.win.blit(itemList [aItem],(textrect.left+30,textrect.top+30+(30*aItem))) #potion of health
       self.win.blit(itemCount[aItem],(textrect.right-25,textrect.top+30+(30*aItem))) # x 1
 
-    self.win.blit(all_icons.equipicon,(textrect.left+14,textrect.top+34+(30*equip_count))) # show equip icon
-
-    if self.nav_menu_in == 4:
+    if aheader == "Weapons":
+      if achar.weapon[1] != "Fists":
+        self.win.blit(all_icons.equipicon,(textrect.left+14,textrect.top+34+(30*equip_count))) # show equip icon
+    
+    if aheader == "Armor":
+      if achar.armor[1] != "Nothing":
+        self.win.blit(all_icons.equipicon,(textrect.left+14,textrect.top+34+(30*equip_count))) # show equip icon
+    
+    if aheader == "Helms":
+      if achar.helmet[1] != "Nothing":
+        self.win.blit(all_icons.equipicon,(textrect.left+14,textrect.top+34+(30*equip_count))) # show equip icon
+    if self.nav_menu_in == 4:  
       itemList = []
+      self.count = 0
       for item in adict:
           itemList.append(item) #creates tmp list of inventory
-
       for possibleItems in self.item_list:
+        self.count +=1
         if possibleItems[1] == itemList[self.equipment_selection-1]:  #name of item "small dagger"
           hoveredOver = possibleItems[4]
           typeOfEquipment = possibleItems[2][1]
-        else:
-          pass
+          self.itemDetails = [possibleItems[2][0],possibleItems[1]]
+          self.indexItem  = self.count -1
+          tmpWep = possibleItems
       
       if typeOfEquipment == "Chest":
         tmpDefence =  achar.basedefence + achar.helmet[4][1] + hoveredOver[1] + achar.weapon[4][1]
@@ -202,7 +227,9 @@ class Inventory():
         tmpSpeed =  achar.basespeed + achar.helmet[4][3]+ achar.armor[4][3]+ hoveredOver[3]
         tmpAttack = achar.baseattack + achar.helmet[4][0]+ achar.armor[4][0] + hoveredOver[0]
 
-
+      description_rect = pygame.Rect(125,354,333,67)
+      pygame.draw.rect (self.win, (100,100,100), description_rect) #item description box
+      self.show_description(None,tmpWep)
       self.tmpAttr = [tmpAttack,tmpDefence,tmpSpeed]
       self.inventory_side_stats()
 
@@ -269,12 +296,14 @@ class Inventory():
     self.inventory_side_stats()
 
     self.cycle_weapons()
+    self.show_description(char,None)
 
   def inventory_side_stats(self):
     statsrect = pygame.Rect(10,272,110,153)
     pygame.draw.rect (self.win, (60,60,60), statsrect) #FOR INDIVIDUAL STATS
     char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
     #Reset everytime we attempt to compare
+
     self.invAttr=[char.attack,char.defence,char.speed]
     #Means we are comparing if the list is greater than 1
     if len(self.tmpAttr) >= 1:
@@ -307,37 +336,40 @@ class Inventory():
       self.show_char_stats(self.level_list)
       self.win.blit(all_icons.icon, (self.itemrect.left-13, self.itemrect.top+40 +((self.curr_party_member -1)*90)))
 
-  #def interact_sub_menu(self):
+  def interact_sub_menu(self,akey):
     """Draws submenu text for Use, Drop, and Back on the display screen
     what we are trying to do with #1 is you cant use a sword but you can
     equip it. Same with quest items so we just have to distinguish them
     to change current inventory
-
     """
-    """
-    top  = self.itemrect.top+70+(30 * self.submenupos)
-
-    for acode in self.item_list: #[itemcode, itemname, itemusecode]
-     if self.submenu[self.submenupos][0] == acode[1]: #if item names are the same
-       self.itemcode = acode[2] #then we snag the item
-
-    if self.itemcode == 1: #CONSUMABLE
-      action  = self.font.render("Use" ,False,(255,255,255)) #action = use or equip
-      self.win.blit(action, (self.itemrect.right-130, top))
-    if self.itemcode == 2: #EQUIPMENT
-      if self.char.wedapon == self.submenu[self.submenupos][0]:
-        action  = self.font.render("Unequip" ,False,(255,255,255)) #action = use or equip
+    top  = self.itemrect.top+300
+    interactMenu = pygame.Rect(250,350,210,75)
+    pygame.draw.rect (self.win, (230,230,230), interactMenu) 
+    if self.itemDetails[0] == "Equipment":
+      if (self.char.weapon[1] == self.itemDetails[1] or
+          self.char.helmet[1] == self.itemDetails[1] or
+          self.char.armor[1]  == self.itemDetails[1]): #if it's same weapon
+        action ="UnEquip"
       else:
-        action  = self.font.render("Equip" ,False,(255,255,255)) #action = use or equip
-      self.win.blit(action, (self.itemrect.right-140, top))
+        action = "Equip"
+      self.action = action
+    words = [action,"Drop","Back"]
+    newtext = []
+    for word in words:
+      if word == "Drop" and action == "UnEquip":
+          newtext.append(self.stats_font.render(word,True,(100,100,100)))
+          self.holding_equip = True
+      elif word == "Drop" and action == "Action":
+          self.holding_equip = False
+      else:
+          newtext.append(self.stats_font.render(word,True,(0,0,0)))
+          
 
-    drop    = self.font.render("Drop",False,(255,255,255))
-    back    = self.font.render("Back",False ,(255,255,255))
 
-    self.win.blit(drop,(self.itemrect.right-90, top))
-    self.win.blit(back,(self.itemrect.right-50, top))
-
-    """
+    for line in range(len(newtext)):  #row     #every new row
+      self.win.blit(newtext[line],(interactMenu.left+25,interactMenu.top+5+(line*25)))
+    #Actual icon tab  
+    self.win.blit(all_icons.icon,(253,355+(self.inventoryChoice*25)))
 
   def sub_choose(self):
     """
@@ -354,96 +386,52 @@ class Inventory():
       pygame.draw.rect(self.win, self.select, ((self.itemrect.right-53) ,top,43,30))
     self.interact_sub_menu()
 
+  def show_description(self,achar,aweapon):
+    equipMenu = pygame.Rect(125,354,333,67)
+    txt = ""
+    if aweapon != None:
+      txt = aweapon[6]
 
-  #def reset_drop(self,sc,le,nmi):
-    """
-    The purpose of this function is to repaint the screen after you drop an item.
+    #Not individual item selection
+    if self.nav_menu_in == 3:
+      if self.cycle_choice == 1:
+        txt = achar.weapon[6]
+      elif self.cycle_choice == 2:
+        txt = achar.helmet[6]
+      elif self.cycle_choice == 3:
+        txt = achar.armor[6]
+    finishedText = []
+    for word in txt:
+      finishedText.append(self.small_font.render(word,True,self.WHITE_COLOR))
+    for line in range(len(finishedText)):  #row     #every new row
+      self.win.blit(finishedText[line],(equipMenu.left+5,equipMenu.top+5+(line*25)))
+  
+  def drop(self):
+    if self.equipment_selection >= 1:
+      self.equipment_selection-=1
+    self.inventory.remove(self.item_list[self.indexItem])
 
-    self.subchoice = sc
-    self.laste = le
-    self.nav_menu_in = nmi
-    self.no = 0
-    self.yes = 0
-    pygame.draw.rect(self.win,(100,100,200), (10,10,self.win.get_width()-20,self.win.get_height()-20))#  MAIN INVENTORY SPACE
-    pygame.draw.rect(self.win, (60,60,60), self.itemrect)
-    self.access_submenu(self.nav_menu)
-    self.items()
-    self.change_buttons() #might not need this
-    #self.show_char_stats(self.char)
-    """
-
-  #def update_inventory(self,akey):
-    """
-    Subchoice:
-    2 is going back, 1 is dropping, 0 is for using
-    self.tmp = self.submenu[self.submenupos] #grabs submenu position in the inventory
-    if self.sub_choice == 0:  #USE/EQUIP
-      if self.itemcode == 1:  #USE
-        self.reset_drop(0,0,1)
-        if "Health" in self.tmp: #BETA test for health potion
-          tmp = self.char.hp + 10
-          if tmp > self.char.maxhp:
-            self.char.hp = self.char.maxhp
-          else:
-            self.char.hp += 10
-            self.inventory.remove(self.tmp)
-      if self.itemcode == 2:
-        #self.char.attack += self.itemcode[self.submenupos][3]
-        tmp = self.submenu[self.submenupos][0] #Iron sword
-        for item in self.item_list:
-          if item[1] == tmp:
-            self.char.attack += item[4] #add the attack value to our main character
-            self.char.weapon = item[1]
-            #self.char.attack += item[3] #item 3 is the attack
-
-    if self.sub_choice == 1:
-      self.confirm_drop()
-      if self.yes == 1:
-        for item in self.inventory:
-          if item[1] == self.tmp[0]:
-            self.inventory.remove(item)
-            self.reset_drop(0,0,1)
-
-        if item not in self.inventory:
-          self.submenupos = self.submenupos - 1
-      if self.no == 1:
-        self.reset_drop(1,1,2)
-
-    if self.sub_choice == 2: #BACK
-      self.reset_drop(0,0,1)
-     """
-
-
-  #def confirm_drop(self):
-    """
-    font  = pygame.font.SysFont('Arial',20)
-    self.width = (15*32)-20  #THIS NEEDS TO CHANGE IF WE CHANGE RESOLUTION OF GAME
-    self.y_pos = 350
-    self.x_pos = 10
-    self.border = 2
-    self.height = 90
-    rect = pygame.Rect((self.x_pos+self.border),(self.y_pos+self.border),(self.width-(self.border*2)),(self.height-(self.border *2)))
-    message_box = pygame.draw.rect(self.win,(230,230,230), rect)
-    dropmessage = ['Are you sure you want to drop: '+ self.tmp[0]+'?']
+  def confirm_drop(self):
+    dropMenu = pygame.Rect(125,240,333,67)
+    message_box = pygame.draw.rect(self.win,(230,230,230), dropMenu)
+    dropmessage = ['Drop: '+ self.item_list[self.indexItem][1] +'?']
     newtext = []
     for word in dropmessage:
-      newtext.append(self.font.render(word,True,(0,0,0)))
+      newtext.append(self.small_font.render(word,True,(0,0,0)))
     for line in range(len(newtext)):  #row     #every new row
-      self.win.blit(newtext[line],(rect.left+5,rect.top+5+(line*25)))
+      self.win.blit(newtext[line],(dropMenu.left+5,dropMenu.top+5+(line*25)))
 
-    yes = self.font.render("Yes",False, (0,0,0))
-    no  = self.font.render("No", False, (0,0,0))
-    self.win.blit(yes, (rect.right-100, rect.top+40))
-    self.win.blit(no , (rect.right-50, rect.top+40))
+    yes = self.small_font.render("Yes",False, (0,0,0))
+    no  = self.small_font.render("No", False, (0,0,0))
+    self.win.blit(yes, (dropMenu.right-150, dropMenu.top+40))
+    self.win.blit(no , (dropMenu.right-50, dropMenu.top+40))
 
-    if self.confirm == 0:
-      self.win.blit(speed, (350,397))
-      #circle = pygame.draw.circle(self.win,(255,0,0), (360,405),5,1)
+    if self.confirm == 1:
+      self.win.blit(all_icons.icon, (dropMenu.right-170,dropMenu.top+40))  
     else:
-      #circle = pygame.draw.circle(self.win,(255,0,0), (410,405),5,1)
-      self.win.blit(all_icons.icon, (400,397))
+      self.win.blit(all_icons.icon, (dropMenu.right-70,dropMenu.top+40))
 
- """  
+   
   def update(self,akey):
     if self.show_inv == 1: #TAB SECTIONS
         if self.nav_menu_in == 0:
@@ -478,12 +466,10 @@ class Inventory():
              if akey == 's':
                self.curr_party_member = self.curr_party_member % (len(self.party))+1
              if akey == 'w':
-               if (self.curr_party_member %len(self.party)) - 1 == 0:
-                 self.curr_party_member = 1
-               else:
+               if (self.curr_party_member %len(self.party)) - 1 >=1:
                  self.curr_party_member -=1
 
-        if self.nav_menu_in == 3 and self.laste == 2: #THIS IS FOR EQUIPPING/NOT EQUIPPING
+        if self.nav_menu_in == 3 and self.laste == 2: 
             if self.nav_menu == 2:
                 self.equipment(self.curr_party_member) #ACCESS THE EQUIPMENT MENU
                 if akey == 'q':
@@ -525,12 +511,70 @@ class Inventory():
                if akey == 'e': 
                   self.nav_menu_in = 5
                   self.laste = 4
-
-        #This is where we actually will prompt for drop, etc.    
+       #Selecting an item to equip
         if self.nav_menu_in == 5 and self.laste == 4:
           if akey == 'q':
             self.nav_menu_in = 4
             self.laste = 3
+          if akey =='e':
+            self.nav_menu_in = 6
+            self.laste = 5
+
+        #Equip, drop, use item
+        if self.nav_menu_in == 6 and self.laste in [5,6]:
+          if self.nav_menu == 2:
+            if akey == 'q':
+              self.nav_menu_in = 4
+              self.laste = 3
+              self.inventoryChoice = 0
+            if akey == 's': #cycle down
+              self.inventoryChoice = (self.inventoryChoice  + 1) % 3
+            if akey == 'w':
+              self.inventoryChoice = (self.inventoryChoice  - 1) % 3
+            if akey == 'e' and self.laste == 5:
+              self.laste = 6
+            elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 0:
+              #Un/Equip Weapon
+             self.party[self.curr_party_member-1].equipGear(self.item_list[self.indexItem],self.action)
+             self.laste = 3
+             self.nav_menu_in = 4
+             self.inventoryChoice = 0
+            elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 1 and self.holding_equip == False:
+              self.laste = 7
+              self.nav_menu_in = 7
+            elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 2:
+              self.nav_menu_in = 4
+              self.laste = 3
+              self.inventoryChoice = 0
+
+        if self.nav_menu_in == 7 and self.laste in [7,8]:
+          self.confirm_drop()
+          if akey == 'q':
+            self.nav_menu_in = 6
+            self.laste = 6
+            self.confirm = 0
+          if akey == 'a':
+            self.confirm = 1
+          if akey == 'd':
+            self.confirm = 0
+          if akey == 'e' and self.laste == 7:
+            self.laste = 8
+          elif akey == 'e' and self.laste == 8 and self.confirm == 0:
+            self.nav_menu_in = 6
+            self.laste = 6
+          elif akey == 'e' and self.laste == 8 and self.confirm == 1:
+            self.drop()
+            #Check to see if we've emptied inv
+            if self.equipment_selection == 0:
+              self.nav_menu_in = 3
+              self.laste=2
+              self.equipment_selection = 1
+            else:
+              self.nav_menu_in = 4
+              self.laste = 3
+              self.confirm = 0
+        
+        #Will need to confirm the drops
           
 
           
