@@ -51,26 +51,26 @@ class Inventory():
       party_frame = pygame.Rect(self.itemrect.left+5, self.itemrect.top+10, 320, 80)
 
       #name
-      name = self.stats_font.render(achar.name, False, (255,255,255))
+      name = self.stats_font.render(achar.name, True, (255,255,255))
       self.win.blit(name, (party_frame.left+75, party_frame.top+(count*90)+5))
 
       #class
-      charclass = self.it_font.render(achar.aclass, False, (255,255,255))
+      charclass = self.it_font.render(achar.aclass, True, (255,255,255))
       self.win.blit(charclass, (party_frame.left+120, party_frame.top+(count*90)+5))
 
-      level = self.small_font.render("lvl   " +str(achar.level), False, (255,255,255))
+      level = self.small_font.render("lvl   " +str(achar.level), True, (255,255,255))
       self.win.blit(level, (party_frame.right-50, party_frame.top+(count*90)+5))
 
       #This part is displaying the profile data on our party
       #HP
       currenthp = str(achar.hp)+" / "+str(achar.maxhp) #this basically means 45/50
-      hp   = self.small_font.render(currenthp, False,(255,255,255)) #hp
+      hp   = self.small_font.render(currenthp, True,(255,255,255)) #hp
       self.win.blit(hp,             (party_frame.left+100, party_frame.top+(count*90)+27)) #hp text
       self.win.blit(all_icons.hearticon, (party_frame.left+75 , party_frame.top+(count*90)+27)) #hp icon
 
       #MP
       currentmp = str(achar.mp)+"/"+str(achar.maxmp) #this basically means 45/50
-      mp   = self.stats_font.render(currentmp, False,(255,255,255)) #mp
+      mp   = self.stats_font.render(currentmp, True,(255,255,255)) #mp
       self.win.blit(mp,            (party_frame.left+100, party_frame.top+(count*90)+52)) #mp text
       self.win.blit(all_icons.manaicon, (party_frame.left+75, party_frame.top+(count*90)+52))
 
@@ -80,18 +80,18 @@ class Inventory():
           xpneeded = level[1] - achar.exp #40-20 = 20 exp needed
 
       currentxp = "Exp Needed      "+str(xpneeded)#this basically means 45/50
-      xp   = self.tiny_font.render(currentxp, False,(255,255,255)) #mp
+      xp   = self.tiny_font.render(currentxp, True,(255,255,255)) #mp
       self.win.blit(xp,            (party_frame.right-115, party_frame.top+(count*90)+60)) #mp text
 
       #ATTACK
       currentattack = str(achar.attack)
-      attack   = self.stats_font.render(currentattack, False,(255,255,255)) #attack
+      attack   = self.stats_font.render(currentattack, True,(255,255,255)) #attack
       self.win.blit(attack,         (party_frame.left+170,party_frame.top+(count*90)+27)) #attack text
       self.win.blit(all_icons.attackicon,(party_frame.left+145 , party_frame.top+(count*90)+27))
 
       #DEFENCE
       currentdefence = str(achar.defence)
-      defence  = self.stats_font.render(currentdefence, False,(255,255,255)) #defence
+      defence  = self.stats_font.render(currentdefence, True,(255,255,255)) #defence
       self.win.blit(defence,             (party_frame.left+170, party_frame.top+(count*90)+52)) #defence text
       self.win.blit(all_icons.defenceicon,    (party_frame.left+145 , party_frame.top+(count*90)+52))
       count +=1
@@ -117,15 +117,15 @@ class Inventory():
     for options in range(len(self.inv_choice)):
       if self.nav_menu_in == 0:
         if self.nav_menu == 1: #items
-          self.win.blit(all_icons.icon,(15,65))
+          self.win.blit(all_icons.icon,(15,62))
         if self.nav_menu == 2: #Equipment
-          self.win.blit(all_icons.icon,(15,125))
+          self.win.blit(all_icons.icon,(15,122))
         if self.nav_menu == 3: #Abilities
-          self.win.blit(all_icons.icon,(15,185))
+          self.win.blit(all_icons.icon,(15,182))
         if self.nav_menu == 4: #Status
-          self.win.blit(all_icons.icon,(15,245))
+          self.win.blit(all_icons.icon,(15,242))
     for aheader in self.inv_choice:
-        header.append(self.font.render(aheader,False,(255,255,255)))
+        header.append(self.stats_font.render(aheader,True,(255,255,255)))
     for headers in range(len(header)):
         self.win.blit(header[headers],(31, 60*(headers+1), 130,30))
 
@@ -153,7 +153,7 @@ class Inventory():
     itemList = []
     itemCount = []
     pygame.draw.rect (self.win, (100,100,100), (290,100,168,250))
-    iheader = self.font.render(aheader,False,(255,255,255))
+    iheader = self.font.render(aheader,True,(255,255,255))
     self.win.blit(iheader,(textrect.left+30,textrect.top+2)) #header
 
     #displays items tab
@@ -164,9 +164,9 @@ class Inventory():
     for item in adict:
       #check current pary members gear to see if its equipped
       #print the rest of the inventory
-      itemList.append(self.stats_font.render(item,False,(255,255,255)))
+      itemList.append(self.stats_font.render(item,True,(255,255,255)))
       count = ("x "+str(adict[item]))
-      itemCount.append(self.stats_font.render(count,False, (255,255,255)))
+      itemCount.append(self.stats_font.render(count,True, (255,255,255)))
 
       if item == achar.weapon[1]:
         equip_count = wep_c
@@ -273,24 +273,24 @@ class Inventory():
 
     char = self.party[self.curr_party_member-1] #we have to index our party member but lists are 0 based
     #Equipment Header
-    header = self.font.render("Equipment",False,(255,255,255))
+    header = self.font.render("Equipment",True,(255,255,255))
     self.win.blit(header, (equiprect.left+20,equiprect.top+15))
-    headername = self.font.render(char.name,False,(255,255,255))
+    headername = self.font.render(char.name,True,(255,255,255))
     self.win.blit(headername, (equiprect.left+20, equiprect.top+50))
 
     #profile picture
     pygame.draw.rect(self.win, (10,10,10), (equiprect.left+20, equiprect.top+80,70,70))
 
-    weapon = self.small_font.render("Weapon: "+char.weapon[1],False,(255,255,255))
+    weapon = self.small_font.render("Weapon: "+char.weapon[1],True,(255,255,255))
     self.win.blit(weapon, (equiprect.left+20,equiprect.top+170))
 
-    helmet= self.small_font.render("Helm : " +char.helmet[1],False,(255,255,255))
+    helmet= self.small_font.render("Helm : " +char.helmet[1],True,(255,255,255))
     self.win.blit(helmet, (equiprect.left+20,equiprect.top+200))
 
-    armor = self.small_font.render("Armor : " +char.armor[1],False,(255,255,255))
+    armor = self.small_font.render("Armor : " +char.armor[1],True,(255,255,255))
     self.win.blit(armor, (equiprect.left+20,equiprect.top+230))
 
-    trinket = self.small_font.render("Trinket : " +char.trinket[1],False,(255,255,255))
+    trinket = self.small_font.render("Trinket : " +char.trinket[1],True,(255,255,255))
     self.win.blit(trinket, (equiprect.left+20,equiprect.top+260))
 
     self.inventory_side_stats()
@@ -314,12 +314,12 @@ class Inventory():
           color = self.RED_COLOR
         if self.tmpAttr[i] == self.invAttr[i]:
           color = self.WHITE_COLOR
-        stat = self.small_font.render(str(self.tmpAttr[i]), False, (color))
+        stat = self.small_font.render(str(self.tmpAttr[i]), True, (color))
         self.win.blit(stat, (statsrect.left+27,statsrect.top+(10+(22*i))))
       self.tmpAttr =[]
     else:
       for i in range(len(self.invAttr)):
-        stat = self.small_font.render(str(self.invAttr[i]), False, self.WHITE_COLOR)
+        stat = self.small_font.render(str(self.invAttr[i]), True, self.WHITE_COLOR)
         self.win.blit(stat, (statsrect.left+27,statsrect.top+(10+(22*i))))
 
     self.win.blit(all_icons.attackicon, (statsrect.left+3, statsrect.top+10))
@@ -421,8 +421,8 @@ class Inventory():
     for line in range(len(newtext)):  #row     #every new row
       self.win.blit(newtext[line],(dropMenu.left+5,dropMenu.top+5+(line*25)))
 
-    yes = self.small_font.render("Yes",False, (0,0,0))
-    no  = self.small_font.render("No", False, (0,0,0))
+    yes = self.small_font.render("Yes",True, (0,0,0))
+    no  = self.small_font.render("No", True, (0,0,0))
     self.win.blit(yes, (dropMenu.right-150, dropMenu.top+40))
     self.win.blit(no , (dropMenu.right-50, dropMenu.top+40))
 
