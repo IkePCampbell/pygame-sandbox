@@ -77,7 +77,7 @@ class Main_Player(pygame.sprite.Sprite):
 
     #DRAWS OUR CHARACTER
     #win.blit(self.image, (self.x,self.y))
-  def move(self):
+  def move(self,zoneChangeSpots):
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
       self.pre_move(0,-32)

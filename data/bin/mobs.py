@@ -20,7 +20,7 @@ class EnMob:
   Initial X: iX
   Initial Y: iY
   """
-  def __init__(self,lvl,health,a,d,g,iX,iY):
+  def __init__(self,lvl,health,a,d,g,iX,iY,amap):
     self.level = lvl
     self.hp = health
     self.attack = a
@@ -39,21 +39,23 @@ class EnMob:
     self.moveopt = [0,1,2,3,4]
     self.ismoving = False
     self.countstep = 0
+    self.map = amap
 
-  def draw(self,win):
+  def draw(self,win,level):
     """
     Okay so here is the dealerino. In order for me not to worry about increments
     of 32 im going to do what i did in my player move file and just divide things by 32
     """
-    if self.ismoving == False:
-      self.adir = randint(0,4)
-      self.premove()
-    self.move()
-    self.lastmove = self.moveopt[self.adir]
+    if level == self.map:
+      if self.ismoving == False:
+        self.adir = randint(0,4)
+        self.premove()
+      self.move()
+      self.lastmove = self.moveopt[self.adir]
 
 
 
-    pygame.draw.rect(win,(0,0,0),self.rect,2)
+      pygame.draw.rect(win,(0,0,0),self.rect,2)
 
 
   def premove(self):
@@ -145,9 +147,9 @@ class EnMob:
 
 class Bat(EnMob):
   """inherits all traits from EnMob class"""
-  def __init__(self,lvl,health,a,d,g,iX,iY):
+  def __init__(self,lvl,health,a,d,g,iX,iY,amap):
     self.id = "001"
     self.name = "Bat"
     #what this is doing is inheriting from the enmob class so its cleaner for me to
     #write instead of wasting 10+ lines for every mob
-    super().__init__(lvl,health,a,d,g,iX,iY)
+    super().__init__(lvl,health,a,d,g,iX,iY,amap)

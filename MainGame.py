@@ -35,25 +35,63 @@ class GAMEFRAME:
 
     #ALL IMAGE STUFF HAPPENS HERE
 
-
     self.collision_dict = {}
     self.party = []
     self.enemy_dict = {}
     self.npc_dict = {}
     self.chest_dict = {}
     self.item_list = AllItems().item_list
-    self.level1 = Floors().level1
+    self.levels = [Floors().level1,Floors().level2]
+    self.currentLevelMap = self.levels[0][0]
+    self.currentLevel = self.levels[0][1]
+    self.zone_change = Floors().areaSwitchArea
+    self.npcList = []
 
     self.level_list = [
       [2,40], #level, amount to next level
       [3,120]
       ]
 
-    self.level1_chest_rewards = [
-      [(3,3), 6],
-      [(11,3),7],
-      [(6,3) ,8]
+    self.chest_rewards = [
+      [(3,3), 6,1,False],
+      [(11,3),7,1,False],
+      [(6,3) ,8,1,False],
+      [(3,3),8,2,False]
     ]
+    self.zoneChangeSpots = []
+  def getZoneChangePlaces(self):
+      for row in range(len(self.currentLevelMap)):
+        for height in range(len(self.currentLevelMap[row])):
+            if self.currentLevelMap[row][height] == 5:
+                self.zoneChangeSpots.append((height,row))
+      #if intentional, set self.calcZoneChange to false
+
+  def areaSwitch(self,char):
+    for i in range(len(self.zone_change)):
+      if char.current_pos == self.zone_change[i][0] and self.currentLevel == self.zone_change[i][1][1]:
+        self.currentLevelMap = self.zone_change[i][3][0]
+        self.currentLevel = self.zone_change[i][3][1]
+        char.current_pos = self.zone_change[i][2]
+        char.current_x = self.zone_change[i][2][1]
+        char.current_y = self.zone_change[i][2][0]
+        char.x = self.zone_change[i][2][1] * 32
+        char.y = self.zone_change[i][2][0] * 32
+        char.rect = pygame.Rect(char.x, char.y, 32,32)
+        self.zoneChangeSpots = []
+
+  def update_npc_coll(self,npcList,char):
+    self.enemy_dict = {}
+    self.npc_dict = {}
+    for i in range(len(npcList)):
+      if npcList[i].map == self.currentLevel:
+        if npcList[i].name != "NPC":
+          self.enemy_dict["mob"+str(i)] = npcList[i]
+        else:
+          self.npc_dict["NPC"+str(i)] =npcList[i]
+    char.enemy_dict = self.enemy_dict
+    char.npc_dict = self.npc_dict
+
+
 
   def draw_tiles(win,levelList,collide_dict):
     #loops through every row and column in our level list
@@ -61,9 +99,9 @@ class GAMEFRAME:
       for height in range(GAME.MAP_X):
         if levelList[row][height] == 0: #WALL
           image = all_icons.wall
-        if levelList[row][height] == 1: #FLOOR
+        if levelList[row][height] in [1,5]: #FLOOR
           image = all_icons.floor
-
+        
         #GET COLLISION BOUNDARIES
         image_rect = image.get_rect()
         image_rect.topleft = (height * image_rect.width,
@@ -84,13 +122,17 @@ class GAMEFRAME:
 
         if levelList[row][height] == 3: #CHEST
           if tc not in collide_dict:
-            newChest = Chest(new_x,new_y,0)
+            newChest = Chest(new_x,new_y,0,GAME.currentLevel)
             collide_dict[tc]   = newChest
 
           if tc not in GAME.chest_dict:
-            newChest = Chest(new_x,new_y,0)
-            GAME.chest_dict[tc]= [newChest,newChest.openpos]
-            GAME.win.blit(image,(new_x,new_y,GAME.SIZE,GAME.SIZE)) #draw basic chest
+            for chest_reward in GAME.chest_rewards:
+              if chest_reward[0] == tc and chest_reward[2] == GAME.currentLevel and chest_reward[3] == False:
+                newChest = Chest(new_x,new_y,0,GAME.currentLevel)
+              elif chest_reward[0] == tc and chest_reward[2] == GAME.currentLevel and chest_reward[3] == True:
+                newChest = Chest(new_x,new_y,1,GAME.currentLevel) 
+              GAME.chest_dict[tc]= [newChest,newChest.openpos]
+              GAME.win.blit(image,(new_x,new_y,GAME.SIZE,GAME.SIZE)) #draw basic chest
 
           if tc in GAME.chest_dict:
             for chest in GAME.chest_dict:
@@ -137,19 +179,16 @@ message = MessageBox('',0,GAME.win, GAME.MAP_X, GAME.SIZE)
 #instance              #x,   y
 main_char = Main_Player(64,64,GAME.collision_dict,GAME.enemy_dict,GAME.npc_dict,25,10)
 inventory = Inventory(GAME.win,GAME.item_list,main_char,GAME.party,start_inventory)
-bat1 = Bat(1,10,1,1,10,6,6)
-bat2 = Bat(1,10,1,1,10,9,9)
-bat3 = Bat(1,10,1,1,10,11,11)
-merchant1 = Merchant(5,3,tier1_consumables,2)
+bat1 = Bat(1,10,1,1,10,6,6,1)
+bat2 = Bat(1,10,1,1,10,9,9,1)
+bat3 = Bat(1,10,1,1,10,11,11,2)
+merchant1 = Merchant(5,3,tier1_consumables,2,1,"NPC","Harold")
 combat = Combat()
 ###############################################
-enemies = [bat1,bat2]
+enemies = [bat1,bat2,bat3]
 npcs = [merchant1]
-GAME.enemy_dict['mob'] = bat1
-GAME.enemy_dict['mob1'] = bat2
-GAME.enemy_dict['mob2'] = bat3
-GAME.npc_dict['merchant1'] = merchant1
-
+GAME.npcList = enemies + npcs
+GAME.update_npc_coll(GAME.npcList,main_char)
 GAME.party.append(main_char)
 
 #always want drawing to be done in one area, anytime i redraw it needs to be here
@@ -161,18 +200,31 @@ def update_screen():
     main_char.incombat == 0:
 
     GAME.win.fill((0,0,0)) #ALWAYS KEEP THIS
-    GAME.draw_tiles(GAME.level1,GAME.collision_dict)
-    main_char.move()
+    #
+    if len(GAME.zoneChangeSpots) == 0:
+      GAME.getZoneChangePlaces()  
+    if main_char.current_pos in GAME.zoneChangeSpots:
+      GAME.areaSwitch(main_char)
+      GAME.collision_dict = {}
+      GAME.chest_dict = {}
+      main_char.collision_dict = {}
+      main_char.enemy_dict = {}
+      GAME.update_npc_coll(GAME.npcList,main_char)
+
+    GAME.draw_tiles(GAME.currentLevelMap,GAME.collision_dict)
+    main_char.collision_dict = GAME.collision_dict
+    main_char.move(GAME.zoneChangeSpots)
+    #Move Zones here, update new pos based off of coordinates I came in
     main_char.in_combat() #checks for combat
     main_char.draw(GAME.win)
 
     merchant1.update(main_char,message)
 
     for enemy in enemies:
-      enemy.draw(GAME.win)
+      enemy.draw(GAME.win,GAME.currentLevel)
 
     for npc in npcs:
-        npc.draw(GAME.win)
+        npc.draw(GAME.win,GAME.currentLevel)
 
   if message.show == 1:
     message.update_text()

@@ -9,7 +9,7 @@ class Merchant:
         2: Weapons
         3: Armor
     """
-    def __init__(self,x,y,alist,thetype):
+    def __init__(self,x,y,alist,thetype,onlevel,classification,name):
         self.x = x
         self.y = y
         self.rect = pygame.Rect(self.x*32,self.y*32, 32,32)
@@ -17,8 +17,12 @@ class Merchant:
         self.goods = alist
         self.atype = thetype
         self.interacting = 0 #not interacting
-    def draw(self,win):
-        pygame.draw.rect(win, (0,0,100),self.rect,2)
+        self.map = onlevel
+        self.name = classification
+        self.displayName = name
+    def draw(self,win,amap):
+        if amap == self.map:
+            pygame.draw.rect(win, (0,0,100),self.rect,2)
 
     def update(self,achar,amessage):
         keys = pygame.key.get_pressed()
