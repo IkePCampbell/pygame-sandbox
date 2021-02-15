@@ -353,7 +353,9 @@ class Inventory():
         action ="UnEquip"
       else:
         action = "Equip"
-      self.action = action
+    elif self.itemDetails[0] == "Item":
+      action = "Use"
+    self.action = action
     words = [action,"Drop","Back"]
     newtext = []
     for word in words:
@@ -454,11 +456,22 @@ class Inventory():
       count = ("x "+str(self.itemDict[item]))
       itemCount.append(self.stats_font.render(count,True, (255,255,255)))
     
-    if len(self.itemDict) > 0 and self.item_selection >= 1:
+    if len(self.itemDict) > 0:
       self.win.blit(all_icons.icon,(equiprect.left,equiprect.top+33+(30*self.item_selection)))
     for aItem in range(len(itemList)):
       self.win.blit(itemList [aItem],(equiprect.left+30,equiprect.top+60+(30*aItem))) #potion of health
       self.win.blit(itemCount[aItem],(equiprect.right-40,equiprect.top+60+(30*aItem))) # x 1
+    itemList = []
+    self.count = 0
+    for item in self.itemDict:
+        itemList.append(item) #creates tmp list of inventory
+    for possibleItems in self.item_list:
+      self.count +=1
+      if possibleItems[1] == itemList[self.item_selection-1]:  #name of item "small dagger"
+        hoveredOver = possibleItems[4]
+        typeOfEquipment = possibleItems[2][1]
+        self.itemDetails = [possibleItems[2][0],possibleItems[1]]
+        self.indexItem  = self.count -1
 
   def update(self,akey):
     if self.show_inv == 1: #TAB SECTIONS
@@ -478,24 +491,24 @@ class Inventory():
           self.nav_menu_in = 0
         if akey == 'e':
           self.nav_menu_in = 2
-
+          
       if self.nav_menu_in == 2 and self.laste == 1:
         if akey == 'q':
           self.nav_menu_in = 0
           self.laste = 0
+        if akey == 'e':
+          self.nav_menu_in = 3
 
         if self.nav_menu == 1:
           #Now need to cycle through every item
           if akey == 's':
-            self.item_selection = self.item_selection % (len(self.itemDict))+1
+            self.item_selection = self.item_selection % (len(self.itemDict)) +1
           if akey == 'w':
-            if (self.item_selection %len(self.itemDict)) - 1 >=1:
+            if (self.item_selection - 1 %len(self.itemDict)) >=1:
               self.item_selection -=1
-
+              
         if self.nav_menu == 2: #equipment again
           self.curr_party_member = 1
-          if akey == 'e':
-            self.nav_menu_in = 3
           if akey == 's':
             self.curr_party_member = self.curr_party_member % (len(self.party))+1
           if akey == 'w':
@@ -503,22 +516,26 @@ class Inventory():
               self.curr_party_member -=1
 
       if self.nav_menu_in == 3 and self.laste == 2: 
+          if self.nav_menu == 1:
+            if akey == 'q':
+                self.nav_menu_in = 2
+                self.laste=1
           if self.nav_menu == 2:
-              self.equipment(self.curr_party_member) #ACCESS THE EQUIPMENT MENU
-              if akey == 'q':
-                  self.nav_menu_in = 2
-                  self.laste=1
-              if akey == 's':
-                  self.cycle_choice = (self.cycle_choice % 4) +1
-              if akey == 'w':
-                  if (self.cycle_choice % 4) - 1 == 0:
-                    self.cycle_choice = 1
-                  else:
-                    self.cycle_choice -=1
-              if akey == 'e':
-                  tmp = len(self.update_dict("Equipment",self.cycle_choice)) #you cant access a menu with items you dont have, this checks to make sure you have at lEAST 1
-                  if tmp > 0:
-                    self.nav_menu_in = 4
+            self.equipment(self.curr_party_member) #ACCESS THE EQUIPMENT MENU
+            if akey == 'q':
+                self.nav_menu_in = 2
+                self.laste=1
+            if akey == 's':
+                self.cycle_choice = (self.cycle_choice % 4) +1
+            if akey == 'w':
+                if (self.cycle_choice % 4) - 1 == 0:
+                  self.cycle_choice = 1
+                else:
+                  self.cycle_choice -=1
+            if akey == 'e':
+                tmp = len(self.update_dict("Equipment",self.cycle_choice)) #you cant access a menu with items you dont have, this checks to make sure you have at lEAST 1
+                if tmp > 0:
+                  self.nav_menu_in = 4
 
       if self.nav_menu_in == 4 and self.laste == 3:
           if self.nav_menu == 2:
@@ -555,6 +572,7 @@ class Inventory():
 
       #Equip, drop, use item
       if self.nav_menu_in == 6 and self.laste in [5,6]:
+
         if self.nav_menu == 2:
           if akey == 'q':
             self.nav_menu_in = 4
@@ -598,14 +616,15 @@ class Inventory():
         elif akey == 'e' and self.laste == 8 and self.confirm == 1:
           self.drop()
           #Check to see if we've emptied inv
-          if self.equipment_selection == 0:
-            self.nav_menu_in = 3
-            self.laste=2
-            self.equipment_selection = 1
-          else:
-            self.nav_menu_in = 4
-            self.laste = 3
-            self.confirm = 0
+          if self.nav_menu == 2:
+            if self.equipment_selection == 0:
+              self.nav_menu_in = 3
+              self.laste=2
+              self.equipment_selection = 1
+            else:
+              self.nav_menu_in = 4
+              self.laste = 3
+              self.confirm = 0
       
       #Will need to confirm the drops
 

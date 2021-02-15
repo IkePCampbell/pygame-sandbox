@@ -292,6 +292,10 @@ while run:
         inventory.access_submenu(inventory.nav_menu)
 
     if inventory.nav_menu_in == 3:
+      if inventory.nav_menu == 1: #items
+        inventory.display_items()
+        inventory.interact_sub_menu(akey)
+
       if inventory.nav_menu == 2:
         inventory.show_description(inventory.party[inventory.curr_party_member-1],None)
         inventory.equipment(inventory.curr_party_member)
@@ -303,6 +307,8 @@ while run:
         inventory.cycle_weapons()
        
     if inventory.nav_menu_in == 6:
+      if inventory.nav_menu == 1:
+        inventory.interact_sub_menu(akey)
       if inventory.nav_menu == 2:
         inventory.equipment(inventory.curr_party_member)
         inventory.cycle_weapons()
