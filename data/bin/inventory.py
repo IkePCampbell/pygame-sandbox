@@ -20,11 +20,9 @@ class Inventory():
     self.submenu = []
     self.sub_choice = 0
     self.laste = 0
-    self.confirm = 0
-    self.yes = 0
-    self.no  = 0
-    self.win = awin
     self.lasti = 0
+    self.confirm = 0
+    self.win = awin
     self.item_list = aitemlist
     self.itemcode = 0
     self.char = achar
@@ -40,6 +38,8 @@ class Inventory():
     self.GREEN_COLOR=(0,255,0)
     self.inventoryChoice = 0
     self.holding_equip = False
+    self.item_selection = 1
+    self.itemDict = {}
 
   def show_char_stats(self,level_list):
     self.level_list = level_list
@@ -342,6 +342,7 @@ class Inventory():
     equip it. Same with quest items so we just have to distinguish them
     to change current inventory
     """
+
     top  = self.itemrect.top+300
     interactMenu = pygame.Rect(250,350,210,75)
     pygame.draw.rect (self.win, (230,230,230), interactMenu) 
@@ -363,8 +364,6 @@ class Inventory():
           self.holding_equip = False
       else:
           newtext.append(self.stats_font.render(word,True,(0,0,0)))
-          
-
 
     for line in range(len(newtext)):  #row     #every new row
       self.win.blit(newtext[line],(interactMenu.left+25,interactMenu.top+5+(line*25)))
@@ -431,150 +430,187 @@ class Inventory():
     else:
       self.win.blit(all_icons.icon, (dropMenu.right-70,dropMenu.top+40))
 
-   
+  def display_items(self):
+    self.itemDict = {}
+    for item in self.inventory: #gets inventory count
+      if item[2][0] == "Item": #e.g. Equipment
+        if item[1] not in self.itemDict:
+          self.itemDict[item[1]] = 1
+        else:
+          self.itemDict[item[1]] +=1
+    
+    equiprect = pygame.Rect(122,55,340,370)
+    description_rect = pygame.Rect(125,354,333,67)
+    pygame.draw.rect(self.win, (60,60,60), equiprect)
+    header = self.font.render("Items",True,(255,255,255))
+    self.win.blit(header, (equiprect.left+20,equiprect.top+15))
+    pygame.draw.rect (self.win, (100,100,100), (125,100,335,250)) #left box
+    pygame.draw.rect (self.win, (100,100,100), description_rect) #item description box
+    #Actually display items
+    itemList = []
+    itemCount = []
+    for item in self.itemDict:
+      itemList.append(self.stats_font.render(item,True,(255,255,255)))
+      count = ("x "+str(self.itemDict[item]))
+      itemCount.append(self.stats_font.render(count,True, (255,255,255)))
+    
+    if len(self.itemDict) > 0 and self.item_selection >= 1:
+      self.win.blit(all_icons.icon,(equiprect.left,equiprect.top+33+(30*self.item_selection)))
+    for aItem in range(len(itemList)):
+      self.win.blit(itemList [aItem],(equiprect.left+30,equiprect.top+60+(30*aItem))) #potion of health
+      self.win.blit(itemCount[aItem],(equiprect.right-40,equiprect.top+60+(30*aItem))) # x 1
+
   def update(self,akey):
     if self.show_inv == 1: #TAB SECTIONS
-        if self.nav_menu_in == 0:
-          if akey == 's': #move up an down the sub tabs in inventory
-            self.nav_menu = (self.nav_menu % 4) + 1
+      if self.nav_menu_in == 0:
+        if akey == 's': #move up an down the sub tabs in inventory
+          self.nav_menu = (self.nav_menu % 4) + 1
+        if akey == 'w':
+          self.nav_menu = 4 if (self.nav_menu % 4) - 1 == 0 else (self.nav_menu) - 1
+        if akey == 'e': #go right into inventory a sub tab
+          if self.nav_menu_in == 0 and self.nav_menu in [1,2,3,4]:
+            self.nav_menu_in = 1 
+        if akey == 'q':
+          self.show_inv = 0
+
+      if self.nav_menu_in == 1 and self.laste == 0:   #IF WE ARE IN A SUB TAB like equipment or items
+        if akey == 'q':
+          self.nav_menu_in = 0
+        if akey == 'e':
+          self.nav_menu_in = 2
+
+      if self.nav_menu_in == 2 and self.laste == 1:
+        if akey == 'q':
+          self.nav_menu_in = 0
+          self.laste = 0
+
+        if self.nav_menu == 1:
+          #Now need to cycle through every item
+          if akey == 's':
+            self.item_selection = self.item_selection % (len(self.itemDict))+1
           if akey == 'w':
-            if (self.nav_menu % 4) - 1 == 0:
-              self.nav_menu = 4
-            else:
-              self.nav_menu  = (self.nav_menu) - 1 #    ^^^
-          if akey == 'e': #go right into inventory a sub tab
-              if self.nav_menu_in == 0 and self.nav_menu == 2: #if we are at EQUIPMENT
-                self.nav_menu_in = 1 #then go inside the the subtab
-          if akey == 'q':
-                self.show_inv = 0
+            if (self.item_selection %len(self.itemDict)) - 1 >=1:
+              self.item_selection -=1
 
-        if self.nav_menu_in == 1 and self.laste == 0:   #IF WE ARE IN A SUB TAB like equipment or items
+        if self.nav_menu == 2: #equipment again
+          self.curr_party_member = 1
+          if akey == 'e':
+            self.nav_menu_in = 3
+          if akey == 's':
+            self.curr_party_member = self.curr_party_member % (len(self.party))+1
+          if akey == 'w':
+            if (self.curr_party_member %len(self.party)) - 1 >=1:
+              self.curr_party_member -=1
+
+      if self.nav_menu_in == 3 and self.laste == 2: 
           if self.nav_menu == 2:
-             if akey == 'q':
-                self.nav_menu_in = 0
-             if akey == 'e':
-               self.nav_menu_in = 2
+              self.equipment(self.curr_party_member) #ACCESS THE EQUIPMENT MENU
+              if akey == 'q':
+                  self.nav_menu_in = 2
+                  self.laste=1
+              if akey == 's':
+                  self.cycle_choice = (self.cycle_choice % 4) +1
+              if akey == 'w':
+                  if (self.cycle_choice % 4) - 1 == 0:
+                    self.cycle_choice = 1
+                  else:
+                    self.cycle_choice -=1
+              if akey == 'e':
+                  tmp = len(self.update_dict("Equipment",self.cycle_choice)) #you cant access a menu with items you dont have, this checks to make sure you have at lEAST 1
+                  if tmp > 0:
+                    self.nav_menu_in = 4
 
-        if self.nav_menu_in == 2 and self.laste == 1:
-           if self.nav_menu == 2: #equipment again
-             if akey == 'q':
-               self.nav_menu_in = 0
-               self.laste = 0
-               self.curr_party_member = 1
-             if akey == 'e':
-               self.nav_menu_in = 3
-             if akey == 's':
-               self.curr_party_member = self.curr_party_member % (len(self.party))+1
-             if akey == 'w':
-               if (self.curr_party_member %len(self.party)) - 1 >=1:
-                 self.curr_party_member -=1
+      if self.nav_menu_in == 4 and self.laste == 3:
+          if self.nav_menu == 2:
+            if akey == 'q':
+              self.nav_menu_in = 3
+              self.laste = 2
+              self.show_equipment_selection = 0
+              self.equipment_selection = 1
+            tmp = len(self.update_dict("Equipment",self.cycle_choice))
 
-        if self.nav_menu_in == 3 and self.laste == 2: 
-            if self.nav_menu == 2:
-                self.equipment(self.curr_party_member) #ACCESS THE EQUIPMENT MENU
-                if akey == 'q':
-                   self.nav_menu_in = 2
-                   self.laste=1
-                if akey == 's':
-                    self.cycle_choice = (self.cycle_choice % 4) +1
-                if akey == 'w':
-                    if (self.cycle_choice % 4) - 1 == 0:
-                      self.cycle_choice = 1
-                    else:
-                      self.cycle_choice -=1
-                if akey == 'e':
-                    tmp = len(self.update_dict("Equipment",self.cycle_choice)) #you cant access a menu with items you dont have, this checks to make sure you have at lEAST 1
-                    if tmp > 0:
-                      self.nav_menu_in = 4
+            if akey == 's': #cycle down
+              if (self.equipment_selection  + 1) == tmp:
+                self.equipment_selection = tmp
+              elif self.equipment_selection < tmp:
+                self.equipment_selection +=1
+        
+            if akey == 'w':
+              if (self.equipment_selection % tmp) -1  == 0:
+                self.equipment_selection = 1
+              elif self.equipment_selection>1 :
+                self.equipment_selection-=1
 
-        if self.nav_menu_in == 4 and self.laste == 3:
-           if self.nav_menu == 2:
-               if akey == 'q':
-                 self.nav_menu_in = 3
-                 self.laste = 2
-                 self.show_equipment_selection = 0
-                 self.equipment_selection = 1
-               tmp = len(self.update_dict("Equipment",self.cycle_choice))
+            if akey == 'e': 
+              self.nav_menu_in = 5
+              self.laste = 4
+      #Selecting an item to equip
+      if self.nav_menu_in == 5 and self.laste == 4:
+        if akey == 'q':
+          self.nav_menu_in = 4
+          self.laste = 3
+        if akey =='e':
+          self.nav_menu_in = 6
+          self.laste = 5
 
-               if akey == 's': #cycle down
-                 if (self.equipment_selection  + 1) == tmp:
-                  self.equipment_selection = tmp
-                 elif self.equipment_selection < tmp:
-                  self.equipment_selection +=1
-           
-               if akey == 'w':
-                  if (self.equipment_selection % tmp) -1  == 0:
-                    self.equipment_selection = 1
-                  elif self.equipment_selection>1 :
-                    self.equipment_selection-=1
-
-               if akey == 'e': 
-                  self.nav_menu_in = 5
-                  self.laste = 4
-       #Selecting an item to equip
-        if self.nav_menu_in == 5 and self.laste == 4:
+      #Equip, drop, use item
+      if self.nav_menu_in == 6 and self.laste in [5,6]:
+        if self.nav_menu == 2:
           if akey == 'q':
             self.nav_menu_in = 4
             self.laste = 3
-          if akey =='e':
-            self.nav_menu_in = 6
-            self.laste = 5
-
-        #Equip, drop, use item
-        if self.nav_menu_in == 6 and self.laste in [5,6]:
-          if self.nav_menu == 2:
-            if akey == 'q':
-              self.nav_menu_in = 4
-              self.laste = 3
-              self.inventoryChoice = 0
-            if akey == 's': #cycle down
-              self.inventoryChoice = (self.inventoryChoice  + 1) % 3
-            if akey == 'w':
-              self.inventoryChoice = (self.inventoryChoice  - 1) % 3
-            if akey == 'e' and self.laste == 5:
-              self.laste = 6
-            elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 0:
-              #Un/Equip Weapon
-             self.party[self.curr_party_member-1].equipGear(self.item_list[self.indexItem],self.action)
-             self.laste = 3
-             self.nav_menu_in = 4
-             self.inventoryChoice = 0
-            elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 1 and self.holding_equip == False:
-              self.laste = 7
-              self.nav_menu_in = 7
-            elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 2:
-              self.nav_menu_in = 4
-              self.laste = 3
-              self.inventoryChoice = 0
-
-        if self.nav_menu_in == 7 and self.laste in [7,8]:
-          self.confirm_drop()
-          if akey == 'q':
-            self.nav_menu_in = 6
+            self.inventoryChoice = 0
+          if akey == 's': #cycle down
+            self.inventoryChoice = (self.inventoryChoice  + 1) % 3
+          if akey == 'w':
+            self.inventoryChoice = (self.inventoryChoice  - 1) % 3
+          if akey == 'e' and self.laste == 5:
             self.laste = 6
-            self.confirm = 0
-          if akey == 'a':
-            self.confirm = 1
-          if akey == 'd':
-            self.confirm = 0
-          if akey == 'e' and self.laste == 7:
-            self.laste = 8
-          elif akey == 'e' and self.laste == 8 and self.confirm == 0:
-            self.nav_menu_in = 6
-            self.laste = 6
-          elif akey == 'e' and self.laste == 8 and self.confirm == 1:
-            self.drop()
-            #Check to see if we've emptied inv
-            if self.equipment_selection == 0:
-              self.nav_menu_in = 3
-              self.laste=2
-              self.equipment_selection = 1
-            else:
-              self.nav_menu_in = 4
-              self.laste = 3
-              self.confirm = 0
-        
-        #Will need to confirm the drops
-          
+          elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 0:
+            #Un/Equip Weapon
+            self.party[self.curr_party_member-1].equipGear(self.item_list[self.indexItem],self.action)
+            self.laste = 3
+            self.nav_menu_in = 4
+            self.inventoryChoice = 0
+          elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 1 and self.holding_equip == False:
+            self.laste = 7
+            self.nav_menu_in = 7
+          elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 2:
+            self.nav_menu_in = 4
+            self.laste = 3
+            self.inventoryChoice = 0
 
+      if self.nav_menu_in == 7 and self.laste in [7,8]:
+        self.confirm_drop()
+        if akey == 'q':
+          self.nav_menu_in = 6
+          self.laste = 6
+          self.confirm = 0
+        if akey == 'a':
+          self.confirm = 1
+        if akey == 'd':
+          self.confirm = 0
+        if akey == 'e' and self.laste == 7:
+          self.laste = 8
+        elif akey == 'e' and self.laste == 8 and self.confirm == 0:
+          self.nav_menu_in = 6
+          self.laste = 6
+        elif akey == 'e' and self.laste == 8 and self.confirm == 1:
+          self.drop()
+          #Check to see if we've emptied inv
+          if self.equipment_selection == 0:
+            self.nav_menu_in = 3
+            self.laste=2
+            self.equipment_selection = 1
+          else:
+            self.nav_menu_in = 4
+            self.laste = 3
+            self.confirm = 0
+      
+      #Will need to confirm the drops
+
+#Inventory update helper functions          
+  def inventory_menu_helper(self,menu_in,laste):
+    self.nav_menu_in = menu_in
+    self.laste = laste
           

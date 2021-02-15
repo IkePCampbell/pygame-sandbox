@@ -19,13 +19,13 @@
 class AllItems():
     def __init__(self):
         self.item_list =[
-        [0, "Small Health Potion",["Consumable", "Health"], [1,"Potion"], 10,  [10,5], ["This restores 10 HP to a character."]],
-        [1, "Large Health Potion",["Consumable", "Health"], [1,"Potion"], 50,  [25,10],["This restores 50 HP to a character."]],
-        [2, "Super Health Potion",["Consumable", "Health"], [1,"Potion"], 100, [50,20],["This restores 100 HP to a character."]],
+        [0, "Small Health Potion",["Item", "Consumable","Health"], [1,"Potion"], 10,  [10,5], ["This restores 10 HP to a character."]],
+        [1, "Large Health Potion",["Item", "Consumable","Health"], [1,"Potion"], 50,  [25,10],["This restores 50 HP to a character."]],
+        [2, "Super Health Potion",["Item", "Consumable","Health"], [1,"Potion"], 100, [50,20],["This restores 100 HP to a character."]],
 
-        [3, "Small Mana Potion",  ["Consumable", "Mana"], [1,"Potion"], 10,  [10,5], ["This restores 10 MP to a character."]],
-        [4, "Large Mana Potion",  ["Consumable", "Mana"], [1,"Potion"], 50,  [25,10], ["This restores 50 MP to a character."]],
-        [5, "Super Mana Potion",  ["Consumable", "Mana"], [1,"Potion"], 100, [50,20], ["This restores 100 MP to a character."]],
+        [3, "Small Mana Potion",  ["Item", "Consumable","Mana"], [1,"Potion"], 10,  [10,5], ["This restores 10 MP to a character."]],
+        [4, "Large Mana Potion",  ["Item", "Consumable","Mana"], [1,"Potion"], 50,  [25,10], ["This restores 50 MP to a character."]],
+        [5, "Super Mana Potion",  ["Item", "Consumable","Mana"], [1,"Potion"], 100, [50,20], ["This restores 100 MP to a character."]],
 
         [6, "Small Dagger"    ,["Equipment","Weapon"], [1,"Dagger"], [1,0,0,3],  [1,8],  ["A small, yet effective weapon."]],
         [7, "Bronze Sword"    ,["Equipment","Weapon"], [3,"Sword"], [2,0,0,2],  [50,25], ["What squires swing at eachother trying", "to be knights."]],
