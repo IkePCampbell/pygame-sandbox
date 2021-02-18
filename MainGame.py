@@ -227,7 +227,6 @@ def update_screen():
 
     for npc in npcs:
         npc.draw(GAME.win,GAME.currentLevel)
-
   if message.show == 1:
     message.update_text()
 
@@ -283,7 +282,6 @@ while run:
     #INTERACTS WITH SUB MENU
     if inventory.nav_menu_in == 1:
       inventory.access_submenu(inventory.nav_menu)
-
     if inventory.nav_menu_in == 2:
       if inventory.nav_menu == 1: #items
         inventory.display_items()
@@ -292,10 +290,6 @@ while run:
         inventory.access_submenu(inventory.nav_menu)
 
     if inventory.nav_menu_in == 3:
-      if inventory.nav_menu == 1: #items
-        inventory.display_items()
-        inventory.interact_sub_menu(akey)
-
       if inventory.nav_menu == 2:
         inventory.show_description(inventory.party[inventory.curr_party_member-1],None)
         inventory.equipment(inventory.curr_party_member)
@@ -308,6 +302,7 @@ while run:
        
     if inventory.nav_menu_in == 6:
       if inventory.nav_menu == 1:
+        inventory.display_items()
         inventory.interact_sub_menu(akey)
       if inventory.nav_menu == 2:
         inventory.equipment(inventory.curr_party_member)
@@ -315,8 +310,10 @@ while run:
         inventory.interact_sub_menu(akey)
 
     if inventory.nav_menu_in == 7:
-      if inventory.nav_menu == 2:
+      if inventory.nav_menu in [1,2]:
         inventory.confirm_drop()
+    if inventory.nav_menu_in == 12:
+      inventory.noItems()
       #inventory.update_inventory()
 
 ##    if inventory.nav_menu_in == 1:  KEEP FOR ITEMS

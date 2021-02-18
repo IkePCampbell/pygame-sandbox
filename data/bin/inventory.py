@@ -401,6 +401,7 @@ class Inventory():
         txt = achar.helmet[6]
       elif self.cycle_choice == 3:
         txt = achar.armor[6]
+
     finishedText = []
     for word in txt:
       finishedText.append(self.small_font.render(word,True,self.WHITE_COLOR))
@@ -465,13 +466,24 @@ class Inventory():
     self.count = 0
     for item in self.itemDict:
         itemList.append(item) #creates tmp list of inventory
-    for possibleItems in self.item_list:
-      self.count +=1
-      if possibleItems[1] == itemList[self.item_selection-1]:  #name of item "small dagger"
-        hoveredOver = possibleItems[4]
-        typeOfEquipment = possibleItems[2][1]
-        self.itemDetails = [possibleItems[2][0],possibleItems[1]]
-        self.indexItem  = self.count -1
+    #sanity check
+    if len(itemList) == 0:
+      self.nav_menu_in = 12
+      self.laste = 12
+
+    if len(itemList) < self.item_selection:
+      self.item_selection = len(itemList)
+    if len(itemList) != 0:
+      for possibleItems in self.item_list:
+        self.count +=1
+        if possibleItems[1] == itemList[self.item_selection-1]:  #name of item "small dagger"
+          hoveredOver = possibleItems[4]
+          typeOfEquipment = possibleItems[2][1]
+          self.itemDetails = [possibleItems[2][0],possibleItems[1]]
+          self.indexItem  = self.count -1
+          tmpItem = possibleItems
+      self.show_description(None,tmpItem)
+
 
   def update(self,akey):
     if self.show_inv == 1: #TAB SECTIONS
@@ -497,15 +509,21 @@ class Inventory():
           self.nav_menu_in = 0
           self.laste = 0
         if akey == 'e':
-          self.nav_menu_in = 3
-
+          if self.nav_menu == 1:
+            self.nav_menu_in = 6
+            self.laste = 5
+          else:
+            self.nav_menu_in = 3
         if self.nav_menu == 1:
           #Now need to cycle through every item
           if akey == 's':
             self.item_selection = self.item_selection % (len(self.itemDict)) +1
           if akey == 'w':
-            if (self.item_selection - 1 %len(self.itemDict)) >=1:
-              self.item_selection -=1
+            if (self.item_selection % (len(self.itemDict))) -1  == 0:
+              self.item_selection = 1
+            elif self.item_selection>1 :
+              self.item_selection-=1
+
               
         if self.nav_menu == 2: #equipment again
           self.curr_party_member = 1
@@ -515,11 +533,7 @@ class Inventory():
             if (self.curr_party_member %len(self.party)) - 1 >=1:
               self.curr_party_member -=1
 
-      if self.nav_menu_in == 3 and self.laste == 2: 
-          if self.nav_menu == 1:
-            if akey == 'q':
-                self.nav_menu_in = 2
-                self.laste=1
+      if self.nav_menu_in == 3 and self.laste == 2:  
           if self.nav_menu == 2:
             self.equipment(self.curr_party_member) #ACCESS THE EQUIPMENT MENU
             if akey == 'q':
@@ -572,6 +586,27 @@ class Inventory():
 
       #Equip, drop, use item
       if self.nav_menu_in == 6 and self.laste in [5,6]:
+        if self.nav_menu == 1:
+          if akey == 'q':
+            self.nav_menu_in = 2
+            self.laste=1
+          if akey == 's': #cycle down
+            self.inventoryChoice = (self.inventoryChoice  + 1) % 3
+          if akey == 'w':
+            self.inventoryChoice = (self.inventoryChoice  - 1) % 3 
+          if akey == 'e' and self.laste == 5:
+              self.laste = 6
+          elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 0:
+            self.laste = 9
+            self.nav_menu_in = 8
+            self.inventoryChoice = 0
+          elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 1 and self.holding_equip == False:
+            self.laste = 7
+            self.nav_menu_in = 7
+          elif akey == 'e' and self.laste == 6 and self.inventoryChoice == 2:
+            self.nav_menu_in = 2
+            self.laste = 1
+            self.inventoryChoice = 0
 
         if self.nav_menu == 2:
           if akey == 'q':
@@ -616,6 +651,9 @@ class Inventory():
         elif akey == 'e' and self.laste == 8 and self.confirm == 1:
           self.drop()
           #Check to see if we've emptied inv
+          if self.nav_menu == 1:
+              self.nav_menu_in = 2
+              self.laste = 1
           if self.nav_menu == 2:
             if self.equipment_selection == 0:
               self.nav_menu_in = 3
@@ -626,7 +664,27 @@ class Inventory():
               self.laste = 3
               self.confirm = 0
       
-      #Will need to confirm the drops
+      if self.nav_menu_in == 12 and self.laste in [12,13,14]:
+        if self.laste == 12 and (akey == 'e' or akey == 'q'):
+          self.noItems()
+          self.nav_menu_in = 0
+          self.laste = 0
+        #elif akey == 'e' and self.laste == 14:
+         # print("got here")
+
+
+      #Selecting Who to use Item On screen
+  def noItems(self):
+    dropMenu = pygame.Rect(125,240,333,67)
+    message_box = pygame.draw.rect(self.win,(230,230,230), dropMenu)
+    dropmessage = ["You have no items!"]
+    newtext = []
+    for word in dropmessage:
+      newtext.append(self.small_font.render(word,True,(0,0,0)))
+    for line in range(len(newtext)):  #row     #every new row
+      self.win.blit(newtext[line],(dropMenu.left+5,dropMenu.top+5+(line*25)))
+    self.win.blit(all_icons.icon,(dropMenu.right-19,dropMenu.bottom-17))
+
 
 #Inventory update helper functions          
   def inventory_menu_helper(self,menu_in,laste):
